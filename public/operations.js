@@ -45,3 +45,8 @@ export function priorityScore(item, today = new Date()) {
   const weights = { critical: 10, warning: 4, info: 1 };
   return explainAlerts(item, today).reduce((sum, alert) => sum + weights[alert.level], 0) + (item.nextAction ? 2 : 0);
 }
+
+export function moveItemStage(items, id, stage, changedAt = new Date().toISOString()) {
+  if (!STAGES[stage]) return items;
+  return items.map((item) => item.id === id ? { ...item, stage, stageChangedAt: changedAt, updatedAt: changedAt } : item);
+}
