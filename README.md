@@ -18,7 +18,9 @@ npm run demo
 - dashboard do Evidence OS com identidade visual PHYLLOS;
 - entrada guiada para identificação têxtil por imagem, etiqueta e observações;
 - hipótese de tecido explicitamente separada de prova;
-- calculadora de medidas com entradas, folgas e resultado explicado;
+- calculadora de medidas e moldes com bases de saias, blusas, vestidos, mangas e calças;
+- guia de tomada de medidas, tabela feminina 36–62 e redução orientada para malhas, adaptados metodologicamente de Marlene Mukai (2015);
+- portfólio progressivo em quatro etapas, permitindo iniciar uma peça com dados mínimos e completar construção, produção e evidências depois;
 - cálculo ambiental transversal, recebendo contexto de portfólio, tecido e molde;
 - tenants e isolamento de recursos;
 - autorização deny-by-default por papel;
@@ -34,7 +36,9 @@ npm run demo
 
 ## Limites deliberados
 
-O frontend publicado é um protótipo funcional. A imagem selecionada ainda não é processada por um modelo de visão; a hipótese têxtil usa as observações e o texto da etiqueta informados pelo usuário. A calculadora roda no cliente e seus resultados ainda não são persistidos no Evidence Ledger.
+O frontend publicado é um protótipo funcional. A imagem selecionada ainda não é processada por um modelo de visão; a hipótese têxtil usa as observações e o texto da etiqueta informados pelo usuário. A calculadora e o portfólio progressivo rodam no cliente; os rascunhos ficam no armazenamento local do navegador e ainda não são persistidos no Evidence Ledger.
+
+As referências de modelagem foram transformadas em lógica interativa e orientação resumida, sem reproduzir páginas ou ilustrações do livro *Modelagem prática para confecção de roupas*, de Marlene Mukai, 3ª edição, 2015. Todo molde calculado deve ser conferido e testado antes do corte final.
 
 O núcleo usa armazenamento em memória para validar contratos de domínio e testes. Ainda não é uma aplicação de produção. Os próximos passos são:
 
