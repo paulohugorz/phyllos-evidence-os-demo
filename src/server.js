@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -75,6 +75,14 @@ async function api(req, res, url) {
 }
 
 const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
+const productionAssetsVersion = "20260717-1";
+
+function enhanceIndexHtml(html) {
+  if (html.includes("production-cards.js")) return html;
+  return html
+    .replace("</head>", `  <link rel="stylesheet" href="/production-cards.css?v=${productionAssetsVersion}">\n</head>`)
+    .replace("</body>", `  <script type="module" src="/production-cards.js?v=${productionAssetsVersion}"></script>\n</body>`);
+}
 
 async function serveStatic(res, pathname) {
   const relative = pathname === "/" ? "index.html" : pathname.slice(1);
@@ -83,6 +91,12 @@ async function serveStatic(res, pathname) {
   try {
     const info = await stat(target);
     if (!info.isFile()) throw new Error("not file");
+    if (relative === "index.html") {
+      const html = enhanceIndexHtml(await readFile(target, "utf8"));
+      res.writeHead(200, { "content-type": mime[".html"], "cache-control": "no-store" });
+      res.end(html);
+      return;
+    }
     res.writeHead(200, { "content-type": mime[extname(target)] || "application/octet-stream", "cache-control": "public, max-age=300" });
     createReadStream(target).pipe(res);
   } catch {
