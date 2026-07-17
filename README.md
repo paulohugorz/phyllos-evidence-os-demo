@@ -21,6 +21,7 @@ npm run demo
 - calculadora de medidas e moldes com bases de saias, blusas, vestidos, mangas e calças;
 - guia de tomada de medidas, tabela feminina 36–62 e redução orientada para malhas, adaptados metodologicamente de Marlene Mukai (2015);
 - portfólio progressivo em quatro etapas, permitindo iniciar uma peça com dados mínimos e completar construção, produção e evidências depois;
+- módulo PHYLLOS Operações derivado do cadastro da peça, com modos Encomenda e Lote, painel diário, etapas, bloqueios, necessidade de material, qualidade, custo e evidências;
 - cálculo ambiental transversal, recebendo contexto de portfólio, tecido e molde;
 - tenants e isolamento de recursos;
 - autorização deny-by-default por papel;
@@ -37,6 +38,8 @@ npm run demo
 ## Limites deliberados
 
 O frontend publicado é um protótipo funcional. A imagem selecionada ainda não é processada por um modelo de visão; a hipótese têxtil usa as observações e o texto da etiqueta informados pelo usuário. A calculadora e o portfólio progressivo rodam no cliente; os rascunhos ficam no armazenamento local do navegador e ainda não são persistidos no Evidence Ledger.
+
+Os alertas operacionais são regras determinísticas e explicáveis calculadas a partir dos dados do cadastro: prazo, bloqueio, próxima ação, responsável, necessidade de material e custo. Eles não executam mudanças e não comprovam a realidade da produção sem atualização humana.
 
 As referências de modelagem foram transformadas em lógica interativa e orientação resumida, sem reproduzir páginas ou ilustrações do livro *Modelagem prática para confecção de roupas*, de Marlene Mukai, 3ª edição, 2015. Todo molde calculado deve ser conferido e testado antes do corte final.
 
