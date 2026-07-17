@@ -1,0 +1,269 @@
+#productionSpecificationSection{
+  font-size:16px;
+}
+#productionSpecificationSection .production-spec-head h3,
+#productionSpecificationSection .tab-intro h4,
+#productionSpecificationSection .smart-empty-state h4{
+  font-size:38px;
+}
+#productionSpecificationSection .production-spec-head p:not(.eyebrow),
+#productionSpecificationSection .tab-intro p,
+#productionSpecificationSection .smart-empty-state p,
+#productionSpecificationSection .method-note p,
+#productionSpecificationSection .record-fields label,
+#productionSpecificationSection .quick-add-form label,
+#productionSpecificationSection .impact-summary-grid small,
+#productionSpecificationSection .impact-summary-grid span,
+#productionSpecificationSection .smart-card-meta span,
+#productionSpecificationSection .spec-gap small,
+#productionSpecificationSection .mini-section-head small,
+#productionSpecificationSection .source-distribution small,
+#productionSpecificationSection .visual-upload-card small,
+#productionSpecificationSection .visual-preview-card figcaption small{
+  font-size:13px;
+  line-height:1.5;
+}
+#productionSpecificationSection .production-spec-metrics strong,
+#productionSpecificationSection .impact-summary-grid strong,
+#productionSpecificationSection .smart-card-stat strong,
+#productionSpecificationSection .smart-card-specificity b{
+  font-size:30px;
+}
+#productionSpecificationSection .smart-card-title strong{
+  font-size:19px;
+}
+#productionSpecificationSection .smart-card-title small,
+#productionSpecificationSection .card-governance strong,
+#productionSpecificationSection .record-heading strong,
+#productionSpecificationSection .library-reference strong,
+#productionSpecificationSection .visual-upload-card strong,
+#productionSpecificationSection .visual-preview-card figcaption strong{
+  font-size:16px;
+}
+#productionSpecificationSection input,
+#productionSpecificationSection select,
+#productionSpecificationSection button,
+#productionSpecificationSection .secondary-action,
+#productionSpecificationSection .primary,
+#productionSpecificationSection .link,
+#productionSpecificationSection .toolbar-toggle{
+  font-size:15px;
+}
+#productionSpecificationSection input,
+#productionSpecificationSection select{
+  min-height:44px;
+}
+#productionSpecificationSection .secondary-action,
+#productionSpecificationSection .primary,
+#productionSpecificationSection .toolbar-toggle{
+  min-height:46px;
+  padding:12px 16px;
+}
+.production-visual-toolbar{
+  display:grid;
+  grid-template-columns:1.4fr auto;
+  gap:18px;
+  align-items:center;
+  border:1px solid var(--line);
+  background:#f6f4ee;
+  padding:18px 20px;
+  margin-bottom:18px;
+}
+.production-visual-toolbar strong{
+  display:block;
+  font:400 28px "Cormorant Garamond", Georgia, serif;
+  margin:6px 0 4px;
+  color:var(--ink);
+}
+.production-visual-toolbar small{
+  color:var(--muted);
+  font-size:14px;
+}
+.visual-toolbar-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:flex-end;
+}
+.toolbar-toggle{
+  border:1px solid var(--ink);
+  background:white;
+  color:var(--ink);
+  cursor:pointer;
+}
+.toolbar-toggle.active{
+  background:var(--ink);
+  color:white;
+}
+.smart-card-title{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.smart-card-text{
+  display:block;
+}
+.smart-card-inline-image{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  background:#f2efe8;
+  flex:0 0 auto;
+}
+.production-visual-gallery{
+  padding:20px;
+  border-bottom:1px solid var(--line);
+  background:white;
+}
+.visual-gallery-head{
+  margin-bottom:14px;
+}
+.visual-gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(180px,1fr));
+  gap:12px;
+}
+.visual-preview-card{
+  border:1px solid var(--line);
+  background:#faf9f4;
+}
+.visual-preview-card img{
+  display:block;
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:#f1efe8;
+}
+.visual-preview-card figcaption{
+  padding:10px 12px 12px;
+}
+.visual-preview-card figcaption strong,
+.visual-preview-card figcaption small{
+  display:block;
+}
+.visual-upload-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(180px,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+.visual-upload-card{
+  display:block;
+  border:1px dashed #bcb6ac;
+  background:#f8f6f1;
+  padding:14px;
+}
+.visual-upload-card strong,
+.visual-upload-card small{
+  display:block;
+}
+.visual-upload-card input{
+  margin-top:12px;
+}
+.visual-gallery-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+.library-reference{
+  align-items:start;
+}
+.library-reference-figure{
+  width:112px;
+  height:84px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  background:#f3f1eb;
+}
+.library-reference{
+  grid-template-columns:112px 135px 1fr;
+}
+.phyllos-access-large #productionSpecificationSection{
+  font-size:18px;
+}
+.phyllos-access-large #productionSpecificationSection .production-spec-head h3,
+.phyllos-access-large #productionSpecificationSection .tab-intro h4,
+.phyllos-access-large #productionSpecificationSection .smart-empty-state h4{
+  font-size:44px;
+}
+.phyllos-access-large #productionSpecificationSection .smart-card-toggle{
+  padding:20px 22px 14px;
+}
+.phyllos-access-large #productionSpecificationSection .smart-card-title strong{
+  font-size:22px;
+}
+.phyllos-access-large #productionSpecificationSection .smart-card-title small,
+.phyllos-access-large #productionSpecificationSection .production-spec-head p:not(.eyebrow),
+.phyllos-access-large #productionSpecificationSection .tab-intro p,
+.phyllos-access-large #productionSpecificationSection .smart-card-meta span,
+.phyllos-access-large #productionSpecificationSection .record-fields label,
+.phyllos-access-large #productionSpecificationSection .quick-add-form label,
+.phyllos-access-large #productionSpecificationSection .method-note p,
+.phyllos-access-large #productionSpecificationSection .visual-upload-card small,
+.phyllos-access-large #productionSpecificationSection .visual-preview-card figcaption small{
+  font-size:15px;
+}
+.phyllos-access-large #productionSpecificationSection .production-spec-metrics strong,
+.phyllos-access-large #productionSpecificationSection .impact-summary-grid strong,
+.phyllos-access-large #productionSpecificationSection .smart-card-stat strong,
+.phyllos-access-large #productionSpecificationSection .smart-card-specificity b{
+  font-size:34px;
+}
+.phyllos-access-large #productionSpecificationSection input,
+.phyllos-access-large #productionSpecificationSection select,
+.phyllos-access-large #productionSpecificationSection button{
+  font-size:16px;
+}
+.phyllos-access-large #productionSpecificationSection input,
+.phyllos-access-large #productionSpecificationSection select,
+.phyllos-access-large #productionSpecificationSection .secondary-action,
+.phyllos-access-large #productionSpecificationSection .primary,
+.phyllos-access-large #productionSpecificationSection .toolbar-toggle{
+  min-height:50px;
+}
+.phyllos-access-contrast #productionSpecificationSection,
+.phyllos-access-contrast #productionSpecificationSection .production-visual-toolbar,
+.phyllos-access-contrast #productionSpecificationSection .visual-upload-card,
+.phyllos-access-contrast #productionSpecificationSection .visual-preview-card,
+.phyllos-access-contrast #productionSpecificationSection .library-reference,
+.phyllos-access-contrast #productionSpecificationSection .smart-card-detail{
+  background:#fff !important;
+  color:#111 !important;
+}
+.phyllos-access-contrast #productionSpecificationSection .smart-production-card,
+.phyllos-access-contrast #productionSpecificationSection .production-visual-toolbar,
+.phyllos-access-contrast #productionSpecificationSection .visual-upload-card,
+.phyllos-access-contrast #productionSpecificationSection .visual-preview-card,
+.phyllos-access-contrast #productionSpecificationSection .library-reference,
+.phyllos-access-contrast #productionSpecificationSection .impact-columns>section,
+.phyllos-access-contrast #productionSpecificationSection .gap-list{
+  border-color:#111 !important;
+}
+.phyllos-access-contrast #productionSpecificationSection .smart-card-title small,
+.phyllos-access-contrast #productionSpecificationSection small,
+.phyllos-access-contrast #productionSpecificationSection span,
+.phyllos-access-contrast #productionSpecificationSection p,
+.phyllos-access-contrast #productionSpecificationSection label{
+  color:#222 !important;
+}
+@media (max-width: 980px){
+  .production-visual-toolbar,
+  .visual-gallery-grid,
+  .visual-upload-grid{
+    grid-template-columns:1fr;
+  }
+  .library-reference{
+    grid-template-columns:1fr;
+  }
+  .library-reference-figure{
+    width:100%;
+    height:auto;
+    aspect-ratio:4/3;
+  }
+  .smart-card-inline-image{
+    width:60px;
+    height:60px;
+  }
+}

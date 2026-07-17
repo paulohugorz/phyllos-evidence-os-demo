@@ -75,13 +75,28 @@ async function api(req, res, url) {
 }
 
 const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
-const productionAssetsVersion = "20260717-1";
+const productionAssetsVersion = "20260717-2";
+const accessibilityAssetsVersion = "20260717-visual-1";
 
 function enhanceIndexHtml(html) {
-  if (html.includes("production-cards.js")) return html;
-  return html
-    .replace("</head>", `  <link rel="stylesheet" href="/production-cards.css?v=${productionAssetsVersion}">\n</head>`)
-    .replace("</body>", `  <script type="module" src="/production-cards.js?v=${productionAssetsVersion}"></script>\n</body>`);
+  let next = html;
+  if (!next.includes("production-cards.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/production-cards.css?v=${productionAssetsVersion}">
+</head>`);
+  }
+  if (!next.includes("production-accessibility.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/production-accessibility.css?v=${accessibilityAssetsVersion}">
+</head>`);
+  }
+  if (!next.includes("production-cards.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/production-cards.js?v=${productionAssetsVersion}"></script>
+</body>`);
+  }
+  if (!next.includes("production-accessibility.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/production-accessibility.js?v=${accessibilityAssetsVersion}"></script>
+</body>`);
+  }
+  return next;
 }
 
 async function serveStatic(res, pathname) {
