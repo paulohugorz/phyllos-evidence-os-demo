@@ -21,7 +21,7 @@ npm run demo
 - calculadora de medidas e moldes com bases de saias, blusas, vestidos, mangas e calças;
 - guia de tomada de medidas, tabela feminina 36–62 e redução orientada para malhas, adaptados metodologicamente de Marlene Mukai (2015);
 - portfólio progressivo em quatro etapas, permitindo iniciar uma peça com dados mínimos e completar construção, produção e evidências depois;
-- módulo PHYLLOS Operações derivado do cadastro da peça, com modos Encomenda e Lote, painel diário, Kanban de produção, bloqueios, necessidade de material, qualidade, custo e evidências;
+- módulo Produção como entrada principal, derivado do cadastro da peça, com modos Encomenda e Lote, painel diário, Kanban, bloqueios, necessidade de material, qualidade, custo e evidências;
 - projetos/compromissos ligados a um cliente e compostos por uma ou mais peças, com herança de modo, prazo, responsável e próxima ação;
 - cálculo ambiental transversal, recebendo contexto de portfólio, tecido e molde;
 - tenants e isolamento de recursos;

@@ -12,14 +12,14 @@
   <aside class="sidebar">
     <div class="brand"><div><strong>PHYLLOS</strong><small>Evidence OS</small></div></div>
     <nav aria-label="Principal">
-      <button class="nav active" data-view="overview"><span>01</span> Visão geral</button>
-      <button class="nav" data-view="products"><span>02</span> Produtos</button>
-      <button class="nav" data-view="findings"><span>03</span> Lacunas</button>
-      <button class="nav" data-view="dossier"><span>04</span> Dossiê</button>
-      <button class="nav" data-view="identify"><span>05</span> Identificar tecido</button>
-      <button class="nav" data-view="measure"><span>06</span> Calculadora</button>
-      <button class="nav" data-view="impact"><span>07</span> Impacto ambiental</button>
-      <button class="nav" data-view="operations"><span>08</span> Operações</button>
+      <button class="nav active" data-view="operations"><span>01</span> Produção</button>
+      <button class="nav" data-view="overview"><span>02</span> Visão geral</button>
+      <button class="nav" data-view="products"><span>03</span> Produtos</button>
+      <button class="nav" data-view="findings"><span>04</span> Lacunas</button>
+      <button class="nav" data-view="dossier"><span>05</span> Dossiê</button>
+      <button class="nav" data-view="identify"><span>06</span> Identificar tecido</button>
+      <button class="nav" data-view="measure"><span>07</span> Calculadora</button>
+      <button class="nav" data-view="impact"><span>08</span> Impacto ambiental</button>
     </nav>
     <div class="sidebar-foot"><span class="online"></span><div><strong>Ambiente piloto</strong><small>Dados demonstrativos</small></div></div>
   </aside>
@@ -27,7 +27,7 @@
     <header><div><p class="eyebrow">MARCA HORIZONTE <i></i> PILOTO</p><h1 id="pageTitle">Visão geral</h1></div><button class="ghost" id="refresh">Atualizar <span>↗</span></button></header>
     <section id="loading" class="loading">Organizando evidências…</section>
     <section id="overview" class="view hidden">
-      <div class="hero"><div class="editorial-shape" aria-hidden="true"></div><div class="hero-copy"><span class="pill"><i></i> Evidence Loop ativo</span><h2>Da informação dispersa<br>à decisão verificável.</h2><p>Acompanhe completude, evidências e lacunas do piloto em um único registro governado.</p></div><div class="score-ring"><strong id="heroScore">—</strong><span>completude</span></div><span class="hero-index">PH / 01</span></div>
+      <div class="hero"><div class="editorial-shape" aria-hidden="true"></div><div class="hero-copy"><span class="pill"><i></i> Evidence Loop ativo</span><h2>Da informação dispersa<br>à decisão verificável.</h2><p>Acompanhe completude, evidências e lacunas do piloto em um único registro governado.</p><button class="hero-action" data-go="operations">Abrir minha Produção →</button></div><div class="score-ring"><strong id="heroScore">—</strong><span>completude</span></div><span class="hero-index">PH / 02</span></div>
       <div class="metrics" id="metrics"></div>
       <div class="grid"><article><div class="section-head"><div><p class="eyebrow">PORTFÓLIO</p><h3>Produtos em análise</h3></div><button class="link" data-go="products">Ver todos →</button></div><div id="productPreview"></div></article><article><div class="section-head"><div><p class="eyebrow">PRIORIDADE</p><h3>Lacunas recentes</h3></div><button class="link" data-go="findings">Resolver →</button></div><div id="findingPreview"></div></article></div>
     </section>
@@ -118,7 +118,7 @@
       </div>
     </section>
     <section id="operations" class="view hidden">
-      <div class="page-intro portfolio-head"><div><p class="eyebrow">PHYLLOS OPERAÇÕES · PILOTO</p><h2>O que precisa acontecer hoje?</h2><p>Transforme peças do portfólio em compromissos executáveis. Os alertas são derivados dos dados registrados e nunca alteram a operação sem confirmação.</p></div><button class="primary" id="operationsNewItem">+ Novo compromisso</button></div>
+      <div class="page-intro portfolio-head"><div><p class="eyebrow">MINHA PRODUÇÃO · PILOTO</p><h2>O que precisa acontecer hoje?</h2><p>Transforme projetos e peças em compromissos executáveis. Os alertas são derivados dos dados registrados e nunca alteram a produção sem confirmação.</p></div><button class="primary" id="operationsNewItem">+ Novo projeto</button></div>
       <form id="projectForm" class="input-panel project-form hidden">
         <div class="section-head"><div><p class="eyebrow">NOVO COMPROMISSO</p><h3>Projeto do cliente</h3></div><button type="button" class="link" id="closeProjectForm">Fechar ×</button></div>
         <div class="field-grid"><label>Nome do projeto<input name="name" required placeholder="Ex.: Coleção Verão ou Casamento Ana"></label><label>Cliente / comprador<input name="customer" required></label><label>Modo<select name="mode" required><option value="custom">Encomenda</option><option value="batch">Lote</option></select></label><label>Prazo do projeto<input name="dueDate" type="date"></label><label>Responsável<input name="responsible"></label><label>Próxima ação<input name="nextAction"></label></div>

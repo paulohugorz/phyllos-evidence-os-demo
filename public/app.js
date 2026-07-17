@@ -44,9 +44,9 @@ function renderPieceProjectContext(){const project=projects.find(x=>x.id===$("#p
 async function load() {
   $("#loading").classList.remove("hidden"); all(".view").forEach(x=>x.classList.add("hidden"));
   const response = await fetch("/api/v1/dashboard"); state = await response.json(); render();
-  $("#loading").classList.add("hidden"); show("overview");
+  $("#loading").classList.add("hidden"); show("operations");
 }
-function show(view) { all(".view").forEach(x=>x.classList.toggle("hidden",x.id!==view)); all(".nav").forEach(x=>x.classList.toggle("active",x.dataset.view===view)); $("#pageTitle").textContent = ({overview:"Visão geral",products:"Produtos",findings:"Lacunas e pendências",dossier:"Dossiê",identify:"Identificar tecido",measure:"Calculadora de medidas",impact:"Impacto ambiental",operations:"Operações"})[view]; if(view==="operations"){renderProjectList();renderOperations();} window.scrollTo({top:0,behavior:"smooth"}); }
+function show(view) { all(".view").forEach(x=>x.classList.toggle("hidden",x.id!==view)); all(".nav").forEach(x=>x.classList.toggle("active",x.dataset.view===view)); $("#pageTitle").textContent = ({overview:"Visão geral",products:"Produtos",findings:"Lacunas e pendências",dossier:"Dossiê",identify:"Identificar tecido",measure:"Calculadora de medidas",impact:"Impacto ambiental",operations:"Produção"})[view]; if(view==="operations"){renderProjectList();renderOperations();} window.scrollTo({top:0,behavior:"smooth"}); }
 async function createTask(button) { button.disabled=true; button.textContent="Criando…"; const response=await fetch("/api/v1/tasks",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({findingId:button.dataset.id,dueAt:"2099-01-01",expectedEvidence:"Documento ou declaração atualizada"})}); if(response.ok){button.textContent="Tarefa criada ✓";toast("Responsabilidade e prazo registrados");}else{button.disabled=false;button.textContent="Tentar novamente";} }
 
 all(".nav").forEach(btn=>btn.addEventListener("click",()=>show(btn.dataset.view)));
