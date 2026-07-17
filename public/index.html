@@ -16,6 +16,8 @@
       <button class="nav" data-view="products"><span>02</span> Produtos</button>
       <button class="nav" data-view="findings"><span>03</span> Lacunas</button>
       <button class="nav" data-view="dossier"><span>04</span> Dossiê</button>
+      <button class="nav" data-view="identify"><span>05</span> Identificar tecido</button>
+      <button class="nav" data-view="measure"><span>06</span> Calculadora</button>
     </nav>
     <div class="sidebar-foot"><span class="online"></span><div><strong>Ambiente piloto</strong><small>Dados demonstrativos</small></div></div>
   </aside>
@@ -30,6 +32,55 @@
     <section id="products" class="view hidden"><div class="page-intro"><p>Produtos, composição declarada e cobertura de evidências.</p></div><div id="productTable" class="table-card"></div></section>
     <section id="findings" class="view hidden"><div class="page-intro"><p>Transforme ausência de informação em responsabilidade, prazo e evidência esperada.</p></div><div id="findingList" class="finding-list"></div></section>
     <section id="dossier" class="view hidden"><div class="dossier-card"><div class="doc-icon">▤</div><p class="eyebrow">SNAPSHOT VERIFICÁVEL</p><h2>Congele o estado atual do piloto</h2><p>O dossiê preserva produtos, fatos, evidências, lacunas e limitações na data de corte. Alterações futuras não modificam o snapshot.</p><button class="primary" id="freezeDossier">Gerar dossiê agora</button><div id="dossierResult"></div></div></section>
+    <section id="identify" class="view hidden tool-view">
+      <div class="tool-intro"><p class="eyebrow">ASSISTENTE EXPERIMENTAL</p><h2>Que tecido é este?</h2><p>Envie registros visuais e descreva o comportamento do material. A PHYLLOS sugere hipóteses e próximos testes — a composição exata depende da etiqueta ou de análise laboratorial.</p></div>
+      <div class="tool-layout">
+        <form id="fabricForm" class="input-panel">
+          <div class="step-title"><span>01</span><div><strong>Registros visuais</strong><small>Até seis imagens ajudam a reduzir ambiguidades.</small></div></div>
+          <div class="upload-grid">
+            <label class="upload">Tecido aberto<input type="file" accept="image/*" data-photo><small>Visão geral, luz natural</small></label>
+            <label class="upload">Superfície de perto<input type="file" accept="image/*" data-photo><small>Textura e trama</small></label>
+            <label class="upload">Contra a luz<input type="file" accept="image/*" data-photo><small>Transparência e densidade</small></label>
+            <label class="upload">Etiqueta<input type="file" accept="image/*" data-photo><small>Composição e cuidados</small></label>
+          </div>
+          <div class="step-title"><span>02</span><div><strong>O que você observa?</strong><small>Não precisa conhecer termos técnicos.</small></div></div>
+          <div class="field-grid">
+            <label>Elasticidade<select name="stretch" required><option value="">Selecione</option><option value="none">Não estica</option><option value="low">Estica pouco</option><option value="high">Estica bastante</option></select></label>
+            <label>Transparência<select name="transparency" required><option value="">Selecione</option><option value="opaque">Opaco</option><option value="medium">Parcial</option><option value="sheer">Transparente</option></select></label>
+            <label>Toque<select name="touch" required><option value="">Selecione</option><option value="smooth">Liso / frio</option><option value="soft">Macio</option><option value="rough">Rústico / irregular</option></select></label>
+            <label>Caimento<select name="drape" required><option value="">Selecione</option><option value="fluid">Fluido</option><option value="medium">Intermediário</option><option value="structured">Estruturado</option></select></label>
+            <label>Brilho<select name="shine"><option value="matte">Fosco</option><option value="subtle">Discreto</option><option value="bright">Brilhante</option></select></label>
+            <label>Uso ou peça<input name="use" placeholder="Ex.: camisa, forro, calça"></label>
+          </div>
+          <label class="wide-field">Texto da etiqueta, se houver<textarea name="label" placeholder="Ex.: 55% linho, 45% viscose"></textarea></label>
+          <label class="consent"><input type="checkbox" required> Confirmo que posso usar estas imagens nesta análise demonstrativa.</label>
+          <button class="primary tool-action" type="submit">Analisar material</button>
+        </form>
+        <aside id="fabricResult" class="result-panel empty-result" aria-live="polite"><span>PH / TEC 01</span><h3>Seu resultado aparecerá aqui</h3><p>Preencha os dados observáveis. O resultado separará fato informado, hipótese e limitação.</p></aside>
+      </div>
+    </section>
+    <section id="measure" class="view hidden tool-view">
+      <div class="tool-intro"><p class="eyebrow">MODELAGEM PLANA</p><h2>Da medida ao traço.</h2><p>Escolha uma base, confira ou substitua as medidas corporais e ajuste o comportamento do tecido. O cálculo é uma base educacional: faça uma prova antes do corte final.</p></div>
+      <div class="tool-layout measure-layout">
+        <form id="measureForm" class="input-panel">
+          <div class="step-title"><span>01</span><div><strong>Peça e referência</strong><small>Use um tamanho inicial ou digite medidas reais.</small></div></div>
+          <div class="field-grid">
+            <label>Base<select id="piece"><option value="reta">Saia reta</option><option value="gode">Saia godê</option><option value="blusa">Blusa básica</option></select></label>
+            <label>Tamanho de referência<select id="size"></select></label>
+          </div>
+          <div class="step-title"><span>02</span><div><strong>Medidas do corpo</strong><small>Em centímetros, sem apertar a fita.</small></div></div>
+          <div class="field-grid" id="measureFields"></div>
+          <div class="step-title"><span>03</span><div><strong>Ajustes de confecção</strong><small>Informe elasticidade e margem desejada.</small></div></div>
+          <div class="field-grid">
+            <label>Elasticidade / redução <output id="elasticityOut">0%</output><input id="elasticity" type="range" min="0" max="30" step="5" value="0"></label>
+            <label>Margem de costura<select id="seam"><option value="0">Sem margem</option><option value="1" selected>1 cm</option><option value="1.5">1,5 cm (zíper)</option></select></label>
+            <label id="godeField" class="hidden">Amplitude<select id="gode"><option value="6.28">Godê total · 4/4</option><option value="4.71">Três quartos · 3/4</option><option value="3.14">Meio godê · 2/4</option><option value="1.57">Um quarto · 1/4</option></select></label>
+          </div>
+          <button class="primary tool-action" type="submit">Calcular molde-base</button>
+        </form>
+        <aside id="measureResult" class="result-panel" aria-live="polite"></aside>
+      </div>
+    </section>
   </main>
   <div id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="/app.js"></script>
