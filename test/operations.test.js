@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dueState, explainAlerts, materialNeed, moveItemStage, operationalItems, priorityScore } from "../public/operations.js";
+import { dueState, explainAlerts, materialNeed, moveItemStage, operationalItems, piecesForProject, priorityScore, projectProgress } from "../public/operations.js";
 
 test("separa compromissos operacionais de itens somente de portfólio", () => {
   assert.deepEqual(operationalItems([{ mode: "portfolio" }, { mode: "custom" }, { mode: "batch" }]).map(x => x.mode), ["custom", "batch"]);
@@ -32,4 +32,11 @@ test("move cartão preservando os demais itens e registra horário", () => {
   assert.equal(moved[0].stageChangedAt, "2026-07-17T12:00:00.000Z");
   assert.deepEqual(moved[1], items[1]);
   assert.deepEqual(moveItemStage(items, "a", "invalid"), items);
+});
+
+test("um projeto agrega uma ou mais peças vinculadas", () => {
+  const pieces = [{ id: "1", projectId: "p", stage: "delivered" }, { id: "2", projectId: "p", stage: "sewing" }, { id: "3", projectId: "x" }];
+  assert.equal(piecesForProject(pieces, "p").length, 2);
+  assert.deepEqual(projectProgress({ id: "p" }, pieces), { pieceCount: 2, delivered: 1, percent: 50 });
+  assert.deepEqual(projectProgress({ id: "empty" }, pieces), { pieceCount: 0, delivered: 0, percent: 0 });
 });

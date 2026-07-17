@@ -50,3 +50,14 @@ export function moveItemStage(items, id, stage, changedAt = new Date().toISOStri
   if (!STAGES[stage]) return items;
   return items.map((item) => item.id === id ? { ...item, stage, stageChangedAt: changedAt, updatedAt: changedAt } : item);
 }
+
+export function piecesForProject(pieces, projectId) {
+  return pieces.filter((piece) => piece.projectId === projectId);
+}
+
+export function projectProgress(project, pieces) {
+  const linked = piecesForProject(pieces, project.id);
+  if (!linked.length) return { pieceCount: 0, delivered: 0, percent: 0 };
+  const delivered = linked.filter((piece) => piece.stage === "delivered").length;
+  return { pieceCount: linked.length, delivered, percent: Math.round(delivered / linked.length * 100) };
+}
