@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: phyllos-evidence-os-demo
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node src/server.js
+    healthCheckPath: /api/v1/dashboard
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0

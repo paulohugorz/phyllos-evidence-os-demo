@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173f35"><title>PHYLLOS Evidence OS</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="mark">P</span><div><strong>PHYLLOS</strong><small>Evidence OS</small></div></div>
+    <nav aria-label="Principal">
+      <button class="nav active" data-view="overview"><span>◫</span> Visão geral</button>
+      <button class="nav" data-view="products"><span>◇</span> Produtos</button>
+      <button class="nav" data-view="findings"><span>!</span> Lacunas</button>
+      <button class="nav" data-view="dossier"><span>▤</span> Dossiê</button>
+    </nav>
+    <div class="sidebar-foot"><span class="online"></span><div><strong>Ambiente piloto</strong><small>Dados demonstrativos</small></div></div>
+  </aside>
+  <main>
+    <header><div><p class="eyebrow">MARCA HORIZONTE · PILOTO</p><h1 id="pageTitle">Visão geral</h1></div><button class="ghost" id="refresh">↻ Atualizar</button></header>
+    <section id="loading" class="loading">Organizando evidências…</section>
+    <section id="overview" class="view hidden">
+      <div class="hero"><div><span class="pill">Evidence Loop ativo</span><h2>Da informação dispersa<br>à decisão verificável.</h2><p>Acompanhe completude, evidências e lacunas do piloto em um único registro governado.</p></div><div class="score-ring"><strong id="heroScore">—</strong><span>completude</span></div></div>
+      <div class="metrics" id="metrics"></div>
+      <div class="grid"><article><div class="section-head"><div><p class="eyebrow">PORTFÓLIO</p><h3>Produtos em análise</h3></div><button class="link" data-go="products">Ver todos →</button></div><div id="productPreview"></div></article><article><div class="section-head"><div><p class="eyebrow">PRIORIDADE</p><h3>Lacunas recentes</h3></div><button class="link" data-go="findings">Resolver →</button></div><div id="findingPreview"></div></article></div>
+    </section>
+    <section id="products" class="view hidden"><div class="page-intro"><p>Produtos, composição declarada e cobertura de evidências.</p></div><div id="productTable" class="table-card"></div></section>
+    <section id="findings" class="view hidden"><div class="page-intro"><p>Transforme ausência de informação em responsabilidade, prazo e evidência esperada.</p></div><div id="findingList" class="finding-list"></div></section>
+    <section id="dossier" class="view hidden"><div class="dossier-card"><div class="doc-icon">▤</div><p class="eyebrow">SNAPSHOT VERIFICÁVEL</p><h2>Congele o estado atual do piloto</h2><p>O dossiê preserva produtos, fatos, evidências, lacunas e limitações na data de corte. Alterações futuras não modificam o snapshot.</p><button class="primary" id="freezeDossier">Gerar dossiê agora</button><div id="dossierResult"></div></div></section>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
