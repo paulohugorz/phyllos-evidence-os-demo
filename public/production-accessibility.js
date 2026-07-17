@@ -3,6 +3,8 @@ const ACCESS_STORAGE_KEY = "phyllos-accessibility-ui";
 const SECTION_ID = "productionSpecificationSection";
 const sectionSelector = `#${SECTION_ID}`;
 let lastSignature = "";
+let domObserver = null;
+let enhancing = false;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const all = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -251,12 +253,25 @@ function enhanceCards() {
   });
 }
 
+function observeDom() {
+  if (!domObserver || !document.body) return;
+  domObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 function renderEnhancements() {
-  applyAccessibilityClasses();
-  const section = $(sectionSelector);
-  if (!section) return;
-  ensureToolbar(section);
-  enhanceCards();
+  if (enhancing) return;
+  enhancing = true;
+  domObserver?.disconnect();
+  try {
+    applyAccessibilityClasses();
+    const section = $(sectionSelector);
+    if (!section) return;
+    ensureToolbar(section);
+    enhanceCards();
+  } finally {
+    enhancing = false;
+    observeDom();
+  }
 }
 
 async function handleFileUpload(input) {
@@ -321,8 +336,8 @@ function init() {
   renderEnhancements();
   lastSignature = `${localStorage.getItem("phyllos-portfolio") || ""}|${localStorage.getItem("phyllos-projects") || ""}|${localStorage.getItem("phyllos-production-specifications") || ""}|${localStorage.getItem(MEDIA_STORAGE_KEY) || ""}|${localStorage.getItem(ACCESS_STORAGE_KEY) || ""}`;
   setInterval(monitorChanges, 900);
-  const observer = new MutationObserver(() => renderEnhancements());
-  observer.observe(document.body, { childList: true, subtree: true });
+  domObserver = new MutationObserver(() => renderEnhancements());
+  observeDom();
   window.addEventListener("storage", renderEnhancements);
 }
 

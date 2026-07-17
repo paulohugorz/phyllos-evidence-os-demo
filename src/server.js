@@ -76,7 +76,7 @@ async function api(req, res, url) {
 
 const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 const productionAssetsVersion = "20260717-2";
-const accessibilityAssetsVersion = "20260717-visual-1";
+const accessibilityAssetsVersion = "20260717-visual-2";
 
 function enhanceIndexHtml(html) {
   let next = html;
