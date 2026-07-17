@@ -2,12 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#173f35"><title>PHYLLOS Evidence OS</title>
+  <meta name="theme-color" content="#0F0F0D"><title>PHYLLOS Evidence OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <aside class="sidebar">
-    <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42V17"/><path d="M24 29C14 29 8 23 8 12c10 0 16 6 16 17Z"/><path d="M24 22C34 22 40 16 40 6c-10 0-16 6-16 16Z"/></svg></span><div><strong>PHYLLOS</strong><small>Evidence OS</small></div></div>
+    <div class="brand"><div><strong>PHYLLOS</strong><small>Evidence OS</small></div></div>
     <nav aria-label="Principal">
       <button class="nav active" data-view="overview"><span>01</span> Visão geral</button>
       <button class="nav" data-view="products"><span>02</span> Produtos</button>
@@ -20,7 +23,7 @@
     <header><div><p class="eyebrow">MARCA HORIZONTE <i></i> PILOTO</p><h1 id="pageTitle">Visão geral</h1></div><button class="ghost" id="refresh">Atualizar <span>↗</span></button></header>
     <section id="loading" class="loading">Organizando evidências…</section>
     <section id="overview" class="view hidden">
-      <div class="hero"><div class="botanical" aria-hidden="true"><span></span><span></span><span></span></div><div class="hero-copy"><span class="pill"><i></i> Evidence Loop ativo</span><h2>Da informação dispersa<br>à decisão verificável.</h2><p>Acompanhe completude, evidências e lacunas do piloto em um único registro governado.</p></div><div class="score-ring"><strong id="heroScore">—</strong><span>completude</span></div><span class="hero-index">PH / 01</span></div>
+      <div class="hero"><div class="editorial-shape" aria-hidden="true"></div><div class="hero-copy"><span class="pill"><i></i> Evidence Loop ativo</span><h2>Da informação dispersa<br>à decisão verificável.</h2><p>Acompanhe completude, evidências e lacunas do piloto em um único registro governado.</p></div><div class="score-ring"><strong id="heroScore">—</strong><span>completude</span></div><span class="hero-index">PH / 01</span></div>
       <div class="metrics" id="metrics"></div>
       <div class="grid"><article><div class="section-head"><div><p class="eyebrow">PORTFÓLIO</p><h3>Produtos em análise</h3></div><button class="link" data-go="products">Ver todos →</button></div><div id="productPreview"></div></article><article><div class="section-head"><div><p class="eyebrow">PRIORIDADE</p><h3>Lacunas recentes</h3></div><button class="link" data-go="findings">Resolver →</button></div><div id="findingPreview"></div></article></div>
     </section>
