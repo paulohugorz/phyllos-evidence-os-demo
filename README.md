@@ -19,6 +19,7 @@ npm run demo
 - entrada guiada para identificação têxtil por imagem, etiqueta e observações;
 - hipótese de tecido explicitamente separada de prova;
 - calculadora de medidas com entradas, folgas e resultado explicado;
+- cálculo ambiental transversal, recebendo contexto de portfólio, tecido e molde;
 - tenants e isolamento de recursos;
 - autorização deny-by-default por papel;
 - organizações e produtos;
@@ -44,4 +45,4 @@ O núcleo usa armazenamento em memória para validar contratos de domínio e tes
 5. portar os serviços para PostgreSQL/Drizzle e autenticação OIDC;
 6. executar piloto com peças reais, testes E2E e staging.
 
-Nenhum estado `proven` é produzido automaticamente. O sistema não certifica sustentabilidade nem publica cálculo ambiental.
+Nenhum estado `proven` é produzido automaticamente. O sistema não certifica sustentabilidade. O cálculo ambiental publicado é uma estimativa demonstrativa, com fatores médios explícitos e faixa de incerteza; não substitui ACV, auditoria ou fatores verificados do fornecedor.

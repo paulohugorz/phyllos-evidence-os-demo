@@ -18,6 +18,7 @@
       <button class="nav" data-view="dossier"><span>04</span> Dossiê</button>
       <button class="nav" data-view="identify"><span>05</span> Identificar tecido</button>
       <button class="nav" data-view="measure"><span>06</span> Calculadora</button>
+      <button class="nav" data-view="impact"><span>07</span> Impacto ambiental</button>
     </nav>
     <div class="sidebar-foot"><span class="online"></span><div><strong>Ambiente piloto</strong><small>Dados demonstrativos</small></div></div>
   </aside>
@@ -79,6 +80,28 @@
           <button class="primary tool-action" type="submit">Calcular molde-base</button>
         </form>
         <aside id="measureResult" class="result-panel" aria-live="polite"></aside>
+      </div>
+    </section>
+    <section id="impact" class="view hidden tool-view">
+      <div class="tool-intro"><p class="eyebrow">ESTIMATIVA CONECTADA</p><h2>Do produto ao impacto.</h2><p>Reaproveite informações geradas no portfólio, na identificação têxtil ou no cálculo do molde. Confira os dados herdados, complete as lacunas e gere uma estimativa transparente — não uma certificação ambiental.</p></div>
+      <div id="impactSources" class="source-strip" aria-live="polite"></div>
+      <div class="tool-layout impact-layout">
+        <form id="impactForm" class="input-panel">
+          <div class="step-title"><span>01</span><div><strong>Origem dos dados</strong><small>Escolha um produto ou use o contexto enviado por outro módulo.</small></div></div>
+          <label class="wide-field">Produto do portfólio<select id="impactProduct"><option value="">Cálculo avulso</option></select></label>
+          <div class="step-title"><span>02</span><div><strong>Material e produção</strong><small>Campos preenchidos automaticamente podem ser corrigidos.</small></div></div>
+          <div class="field-grid">
+            <label>Família do material<select id="impactMaterial" required><option value="">Selecione</option><option value="cotton">Algodão</option><option value="recycled-polyester">Poliéster reciclado</option><option value="polyester">Poliéster</option><option value="linen-viscose">Linho e viscose</option><option value="viscose">Viscose</option><option value="generic">Material não confirmado</option></select></label>
+            <label>Massa por peça<span class="unit-field"><input id="impactMass" type="number" min="1" step="1" required><i>g</i></span></label>
+            <label>Quantidade<input id="impactQuantity" type="number" min="1" step="1" value="1" required></label>
+            <label>Perda de corte <span class="unit-field"><input id="impactWaste" type="number" min="0" max="100" step="1" value="15" required><i>%</i></span></label>
+            <label>Energia de confecção <span class="unit-field"><input id="impactEnergy" type="number" min="0" step="0.1" value="0.8" required><i>kWh</i></span></label>
+            <label>Distância logística <span class="unit-field"><input id="impactDistance" type="number" min="0" step="1" value="300" required><i>km</i></span></label>
+          </div>
+          <div id="inheritedFields" class="inherited-fields"></div>
+          <button class="primary tool-action" type="submit">Calcular estimativa ambiental</button>
+        </form>
+        <aside id="impactResult" class="result-panel empty-result" aria-live="polite"><span>PH / IMP 01</span><h3>Aguardando contexto</h3><p>Comece por um produto, tecido ou molde. A PHYLLOS mostrará dados reaproveitados, premissas e lacunas.</p></aside>
       </div>
     </section>
   </main>
