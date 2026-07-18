@@ -1,0 +1,172 @@
+/* PHYLLOS mobile-first accessibility layer */
+html{max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+body{max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%;height:auto}
+button,input,select,textarea{max-width:100%}
+.mobile-nav-toggle,.mobile-nav-backdrop{display:none}
+
+@media(max-width:760px){
+  :root{--mobile-gutter:16px;--mobile-top:72px}
+  body{min-width:0;font-size:16px}
+  body.mobile-nav-open{overflow:hidden;touch-action:none}
+
+  .mobile-nav-toggle{
+    position:fixed;display:flex;align-items:center;justify-content:center;flex-direction:column;
+    left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));
+    width:52px;height:52px;border:1px solid #d7d1c8;background:#fffefa;color:#0f0f0d;
+    z-index:1200;box-shadow:0 8px 28px #0f0f0d26;cursor:pointer;border-radius:50%;
+  }
+  .mobile-nav-toggle span{display:block;width:21px;height:2px;background:currentColor;margin:2px 0;transition:transform .2s,opacity .2s}
+  .mobile-nav-toggle b{position:absolute;left:58px;padding:7px 10px;background:#fffefa;border:1px solid #d7d1c8;font:600 13px "Jost",Arial,sans-serif;letter-spacing:.02em;white-space:nowrap}
+  .mobile-nav-toggle.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .mobile-nav-toggle.open span:nth-child(2){opacity:0}
+  .mobile-nav-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  .mobile-nav-toggle:focus-visible{outline:3px solid #ecd2b5;outline-offset:3px}
+
+  .mobile-nav-backdrop{
+    display:block;position:fixed;inset:0;border:0;background:#0f0f0da8;z-index:1050;cursor:pointer;
+  }
+  .mobile-nav-backdrop[hidden]{display:none}
+
+  .sidebar{
+    display:flex!important;position:fixed!important;inset:0 auto 0 0!important;
+    width:min(88vw,350px)!important;max-width:350px;height:100dvh;
+    padding:max(28px,env(safe-area-inset-top)) 22px max(24px,env(safe-area-inset-bottom))!important;
+    transform:translateX(-105%);transition:transform .24s ease;z-index:1100!important;
+    overflow-y:auto;overscroll-behavior:contain;box-shadow:18px 0 50px #0004;
+  }
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar:after{opacity:.35}
+  .sidebar .brand{padding:0 4px 26px!important}
+  .sidebar .brand div{display:block!important;font-size:initial!important}
+  .sidebar .brand strong{font-size:30px!important;letter-spacing:.22em}
+  .sidebar .brand small{font-size:11px!important;line-height:1.5}
+  .sidebar nav{display:grid!important;gap:2px!important;width:100%}
+  .sidebar .nav,.sidebar .nav:not(.active){
+    display:block!important;width:100%;min-height:54px;padding:15px 8px!important;
+    font:400 16px/1.35 "Jost",Arial,sans-serif!important;font-size:16px!important;
+    color:#d2cec8;text-align:left;white-space:normal!important;
+  }
+  .sidebar .nav.active{background:#ffffff12;color:#fff;padding-left:12px!important}
+  .sidebar .nav span{display:inline-block!important;width:38px;font-size:12px!important}
+  .sidebar-foot{padding-top:18px!important}
+  .sidebar-foot div{display:block!important}
+  .sidebar-foot strong,.sidebar-foot small{font-size:12px!important}
+
+  main{margin-left:0!important;width:100%;min-width:0;padding:var(--mobile-top) var(--mobile-gutter) calc(84px + env(safe-area-inset-bottom))!important;overflow:visible}
+  main>header{min-height:56px;margin:0 0 22px;padding-left:58px;align-items:center!important;gap:10px}
+  main>header>div{min-width:0}
+  main>header .eyebrow{display:none}
+  #pageTitle{font-size:34px;line-height:1;overflow-wrap:anywhere}
+  #refresh{min-width:46px;min-height:46px;padding:7px!important;flex:0 0 auto}
+
+  h2{overflow-wrap:anywhere}
+  .hero{display:block!important;min-height:0;padding:30px 22px!important}
+  .hero h2{font-size:36px!important;line-height:1.05}
+  .hero p{font-size:16px;line-height:1.6}
+  .score-ring{width:132px!important;height:132px!important;margin:24px 0 0!important}
+  .hero-action,.primary,.secondary-action,.ghost,.link{min-height:46px;font-size:15px}
+
+  .metrics{grid-template-columns:1fr!important;gap:10px!important}
+  .metric{padding:19px!important}
+  .metric span{font-size:14px!important}
+  .metric strong{font-size:38px!important}
+  .grid,.tool-layout,.measure-layout,.impact-layout,.operations-grid,.impact-columns,.pi5-head,.pi5-body{grid-template-columns:minmax(0,1fr)!important}
+  .grid{display:grid!important}
+  .grid article{margin:0!important}
+  .grid article,.table-card,.finding-list,.input-panel,.result-panel,.operations-grid>article,.pi5-panel{padding:18px!important;min-width:0}
+  .result-panel{position:static!important}
+  .tool-intro h2,.portfolio-head h2{font-size:38px!important}
+  .tool-intro>p:last-child,.page-intro p,.portfolio-head p{font-size:16px;line-height:1.55}
+
+  .page-intro,.portfolio-head,.section-head,.operations-toolbar,.source-strip,.production-spec-head,.production-visual-toolbar,.tab-intro,.pi5-head{
+    display:flex!important;flex-direction:column;align-items:stretch!important;gap:12px!important;
+  }
+  .portfolio-head .primary,.page-intro .primary,.section-head button{width:100%}
+  .section-head h3{font-size:31px!important}
+
+  .field-grid,.upload-grid,.visual-gallery-grid,.visual-upload-grid,.quick-add-form,.record-fields,.component-fields,.process-fields,.technique-fields,.impact-summary-grid,.pi5-trust{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .field-grid label,.wide-field,.record-fields label,.quick-add-form label,.pi5-feedback label{font-size:14px!important;letter-spacing:.04em}
+  .field-grid input,.field-grid select,.wide-field textarea,.wide-field select,.record-fields input,.record-fields select,.quick-add-form input,.quick-add-form select,.pi5-feedback input,.pi5-feedback textarea{
+    min-height:50px;font-size:16px!important;padding:13px!important;
+  }
+  .wide-field textarea,.pi5-feedback textarea{min-height:110px}
+  input[type="checkbox"]{width:24px!important;height:24px!important;min-height:24px}
+
+  .table-card{overflow:hidden}
+  .table-head{display:none!important}
+  .product-line{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:18px 4px!important}
+  .product-line>*{display:block!important}
+  .product-line .row-actions{display:flex!important;flex-wrap:wrap;gap:8px}
+  .product-line .row-actions button{flex:1 1 140px;border:1px solid #d7d1c8;padding:11px}
+  .row{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+  .finding-card{grid-template-columns:42px minmax(0,1fr)!important}
+  .finding-card button{grid-column:1/-1!important;width:100%}
+
+  .operations-toolbar>div{display:grid!important;grid-template-columns:1fr 1fr;width:100%}
+  .op-filter{min-height:46px;font-size:13px!important;padding:10px!important}
+  .operations-board{grid-template-columns:repeat(8,minmax(82vw,1fr))!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .operations-board>section{scroll-snap-align:start;min-height:220px}
+  .queue-item{grid-template-columns:1fr!important;gap:8px!important}
+  .queue-item .op-edit{width:100%;border:1px solid #d7d1c8;padding:10px}
+  .project-card{grid-template-columns:1fr!important;gap:14px!important}
+
+  .smart-card-toggle{display:grid!important;grid-template-columns:1fr auto!important;gap:12px!important;padding:16px!important}
+  .smart-card-code{grid-column:1/-1}
+  .smart-card-title{grid-column:1/2;min-width:0}
+  .smart-card-title strong{font-size:20px!important}
+  .smart-card-title small{font-size:14px!important;line-height:1.4}
+  .smart-card-stat{display:none!important}
+  .smart-card-specificity{grid-column:2;grid-row:2}
+  .smart-card-chevron{grid-column:2;grid-row:1}
+  .smart-card-meta{padding:0 16px 16px!important;gap:7px!important}
+  .smart-card-meta span{font-size:13px!important;padding:7px 9px!important}
+  .card-governance{grid-template-columns:1fr!important;padding:16px!important}
+  .card-governance-actions{display:grid!important;grid-template-columns:1fr}
+  .spec-tabs{padding:0!important;display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory}
+  .spec-tabs button{min-width:max-content;min-height:48px;font-size:14px!important;scroll-snap-align:start}
+  .spec-tab-panel,.production-visual-gallery{padding:16px!important}
+  .library-reference{grid-template-columns:1fr!important}
+  .library-reference-figure{width:100%!important;height:auto!important;aspect-ratio:4/3}
+  .record-heading{align-items:flex-start!important;flex-direction:column}
+  .record-heading>div{width:100%}
+  .record-actions{align-self:flex-end}
+  .record-title{min-width:0!important;width:100%}
+  .impact-actions,.visual-gallery-actions{display:grid!important;grid-template-columns:1fr}
+
+  .production-visual-toolbar strong{font-size:28px!important}
+  .visual-toolbar-actions{display:grid!important;grid-template-columns:1fr;width:100%}
+  .toolbar-toggle{width:100%}
+  .smart-card-inline-image{width:72px!important;height:72px!important}
+
+  .pi5-panel{margin:18px 0!important}
+  .pi5-head h3{font-size:38px!important}
+  .pi5-actions{display:grid!important;grid-template-columns:1fr}
+  .pi5-actions button{width:100%}
+  .pi5-score-card strong{font-size:72px!important}
+  .pi5-trust{grid-template-columns:1fr!important}
+  .pi5-feedback form{grid-template-columns:1fr!important;padding:16px!important}
+  .pi5-feedback button{width:100%!important}
+
+  .source-strip>div{align-items:flex-start!important;flex-wrap:wrap}
+  .source-strip small{border-left:0!important;padding-left:0!important}
+  .inherited-fields>div{grid-template-columns:1fr!important}
+  .inherited-fields span{border-right:0!important}
+
+  .progress-steps{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:5px}
+  .progress-steps button{min-width:170px;min-height:48px;font-size:14px;scroll-snap-align:start}
+  .portfolio-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  .portfolio-actions>*{width:100%!important;text-align:center}
+
+  #toast{left:12px!important;right:12px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important;font-size:15px;text-align:center;z-index:1300}
+}
+
+@media(max-width:380px){
+  :root{--mobile-gutter:12px}
+  #pageTitle{font-size:30px}
+  .mobile-nav-toggle b{display:none}
+  main>header{padding-left:54px}
+  .hero h2,.tool-intro h2,.portfolio-head h2,.pi5-head h3{font-size:33px!important}
+}
