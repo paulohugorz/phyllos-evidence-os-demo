@@ -1,0 +1,12 @@
+{
+  "protocolCode": "PI5-PHYSICAL-CAPTURE",
+  "protocolVersion": "1.0",
+  "sampleCanonicalKey": "sample:pi5-piloto-001",
+  "capturedAt": "2026-07-18T13:08:43Z",
+  "operator": "Paulo Nascimento",
+  "device": "preencher modelo do celular",
+  "lighting": "preencher natural, artificial ou mista",
+  "background": "preencher",
+  "distanceCm": null,
+  "notes": ""
+}

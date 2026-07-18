@@ -407,6 +407,10 @@ export class PI5TrainingPostgresStore {
     const result = await this.query(`
       SELECT
         (SELECT COUNT(*)::int FROM pi5_physical_samples) AS samples,
+        (SELECT COUNT(*)::int FROM pi5_physical_samples WHERE synthetic = FALSE) AS physical_samples,
+        (SELECT COUNT(*)::int FROM pi5_physical_samples WHERE synthetic = TRUE) AS synthetic_samples,
+        (SELECT COUNT(*)::int FROM pi5_dataset_versions WHERE purpose ILIKE 'synthetic%') AS synthetic_dataset_versions,
+        (SELECT COUNT(*)::int FROM pi5_model_runs) AS model_runs,
         (SELECT COUNT(*)::int FROM pi5_evidence_assets) AS evidence,
         (SELECT COUNT(*)::int FROM pi5_measurements) AS measurements,
         (SELECT COUNT(*)::int FROM pi5_labeling_sessions) AS labeling_sessions,

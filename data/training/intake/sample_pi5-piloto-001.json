@@ -1,0 +1,74 @@
+{
+  "registeredAt": "2026-07-18T13:02:27.654Z",
+  "organization": {
+    "id": "0cf4c952-d3a8-4269-8560-3206e35a92c7",
+    "canonical_key": "phyllos-lab",
+    "name": "PHYLLOS Lab",
+    "organization_type": "laboratory",
+    "country_code": "BR",
+    "created_at": "2026-07-18T13:02:27.590Z"
+  },
+  "actor": {
+    "id": "016c4db7-f23b-4163-8aad-054759de66de",
+    "organization_id": "0cf4c952-d3a8-4269-8560-3206e35a92c7",
+    "canonical_key": "paulo-nascimento",
+    "display_name": "Paulo Nascimento",
+    "actor_type": "user",
+    "active": true,
+    "created_at": "2026-07-18T13:02:27.607Z"
+  },
+  "product": {
+    "id": "088bd208-bd01-4af3-8e3e-9df218a5157d",
+    "organization_id": "0cf4c952-d3a8-4269-8560-3206e35a92c7",
+    "canonical_key": "product:pi5-piloto-001",
+    "product_family_key": "family:camisa",
+    "sku": "PI5-PILOTO-001",
+    "category": "camisa",
+    "name": "Amostra piloto PI5",
+    "created_at": "2026-07-18T13:02:27.615Z"
+  },
+  "sample": {
+    "id": "96978592-eace-47a8-a205-7eb9b6ffe0c5",
+    "product_id": "088bd208-bd01-4af3-8e3e-9df218a5157d",
+    "batch_id": null,
+    "canonical_key": "sample:pi5-piloto-001",
+    "lineage_group_key": "lineage:pi5-piloto-001",
+    "sample_kind": "physical_piece",
+    "collection_status": "registered",
+    "collected_at": "2026-07-18T13:02:27.619Z",
+    "collected_by": "016c4db7-f23b-4163-8aad-054759de66de",
+    "storage_location": "PHYLLOS Lab",
+    "synthetic": false,
+    "created_at": "2026-07-18T13:02:27.624Z"
+  },
+  "reliability": {
+    "sample_id": "96978592-eace-47a8-a205-7eb9b6ffe0c5",
+    "canonical_key": "sample:pi5-piloto-001",
+    "lineage_group_key": "lineage:pi5-piloto-001",
+    "collection_status": "registered",
+    "synthetic": false,
+    "evidence_count": "0",
+    "verified_evidence_count": "0",
+    "conflicting_evidence_count": "0",
+    "measurement_count": "0",
+    "strong_measurement_count": "0",
+    "blocked_measurement_count": "0",
+    "mean_measurement_quality": "0",
+    "custody_event_count": "0",
+    "open_quarantine_count": "0",
+    "reliability_score": "15.00"
+  },
+  "status": {
+    "mode": "postgresql",
+    "durable": true,
+    "samples": 1,
+    "evidence": 0,
+    "measurements": 0,
+    "labeling_sessions": 0,
+    "labels": 0,
+    "gold_labels": 0,
+    "eligible_records": 0,
+    "open_quarantine": 0,
+    "checkedAt": "2026-07-18T13:02:27.653Z"
+  }
+}
