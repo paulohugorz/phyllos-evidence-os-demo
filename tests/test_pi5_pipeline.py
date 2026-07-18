@@ -1,6 +1,6 @@
 import json, tempfile, unittest
 from pathlib import Path
-from mlops.pi5.common import training_rows
+from mlops.pi5.common import training_rows, predict_linear
 from mlops.pi5.train import fit
 from mlops.pi5.evaluate import evaluate, promotion_decision
 from mlops.pi5.orchestrate import run
@@ -14,22 +14,28 @@ class PI5PipelineTest(unittest.TestCase):
             dims={"climate":base,"water":min(5,base+.2),"chemicals":2.5,"materials":3.0,"wasteCircularity":3.2,"durability":3.4}
             score=sum([dims["climate"]*.3,dims["water"]*.2,dims["chemicals"]*.15,dims["materials"]*.15,dims["wasteCircularity"]*.1,dims["durability"]*.1])
             expert=max(0,min(5,score*.92+.22))
-            events.append({"id":pid,"eventType":"prediction","category":"camisa" if i%2 else "camiseta","prediction":{"predictionId":pid,"score":score,"dimensions":dims,"coverage":82,"confidence":74}})
-            events.append({"id":f"f-{i}","eventType":"expert_feedback","predictionId":pid,"expertScore":expert,"labelStatus":"validated"})
+            events.append({"id":pid,"eventType":"prediction","entityId":f"piece-{i}","category":"camisa" if i%2 else "camiseta","prediction":{"predictionId":pid,"baseScore":score,"score":score,"dimensions":dims,"coverage":82,"confidence":74,"gate":{"state":"contextualized"}}})
+            events.append({"id":f"f-{i}","validationId":f"v-{i}","eventType":"expert_feedback","predictionId":pid,"expertScore":expert,"labelStatus":"validated"})
         return events
-    def test_training_rows_join_predictions_feedback(self):
-        rows=training_rows(self.synthetic_events(5)); self.assertEqual(len(rows),5); self.assertEqual(len(rows[0]["x"]),9)
-    def test_model_fits_and_evaluates(self):
+    def test_training_rows_join_predictions_feedback_as_residual(self):
+        rows=training_rows(self.synthetic_events(5)); self.assertEqual(len(rows),5); self.assertEqual(len(rows[0]["x"]),9); self.assertAlmostEqual(rows[0]["adjustment"],rows[0]["y"]-rows[0]["base"])
+    def test_model_fits_residual_and_evaluates(self):
         rows=training_rows(self.synthetic_events()); model,train,test=fit(rows,epochs=800)
+        self.assertEqual(model["target"],"residual_adjustment"); self.assertLessEqual(model["maxAbsoluteAdjustment"],.5)
         result=evaluate(model,test); self.assertLess(result["challenger"]["mae"],.25)
+        for row in test: self.assertLessEqual(abs(predict_linear(model,row["x"],row["base"])-row["base"]),.5)
     def test_promotion_requires_minimum_samples(self):
         rows=training_rows(self.synthetic_events(10)); model,_,test=fit(rows,epochs=300)
-        decision=promotion_decision(evaluate(model,test),{"minValidatedExamples":70},10); self.assertFalse(decision["promote"])
+        decision=promotion_decision(evaluate(model,test),{"minValidatedExamples":70},10,model); self.assertFalse(decision["promote"])
+    def test_promotion_rejects_unrestricted_model(self):
+        evaluation={"challenger":{"n":1,"mae":.1,"byCategory":{}},"champion":{"n":1,"mae":.2,"byCategory":{}}}
+        decision=promotion_decision(evaluation,{"minValidatedExamples":1,"maxCalibrationAdjustment":.5},1,{"target":"direct_score","maxAbsoluteAdjustment":2})
+        self.assertFalse(decision["promote"]); self.assertIn("calibration_target_invariant_failed",decision["reasons"])
     def test_orchestrator_writes_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp); events=root/"events.jsonl"; champion=root/"champion.json"
             events.write_text("\n".join(json.dumps(e) for e in self.synthetic_events())+"\n")
-            champion.write_text(json.dumps({"modelVersion":"baseline","promotionPolicy":{"minValidatedExamples":70,"minImprovementPct":1,"maxGlobalMae":.6,"maxSubgroupMae":.9}}))
+            champion.write_text(json.dumps({"modelVersion":"baseline","calibrationPolicy":{"maxAbsoluteAdjustment":.5},"promotionPolicy":{"minValidatedExamples":70,"minImprovementPct":1,"maxGlobalMae":.6,"maxSubgroupMae":.9}}))
             report=run(events,champion,root/"challenger.json",root/"report.json",allow_promote=True)
             self.assertEqual(report["validatedExamples"],90); self.assertTrue((root/"report.json").exists())
 if __name__=="__main__": unittest.main()

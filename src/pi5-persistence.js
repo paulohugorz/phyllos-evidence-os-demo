@@ -16,10 +16,10 @@ function eventHash(event) {
 
 function normalizeEvent(event = {}) {
   return {
+    ...event,
     id: String(event.id || randomUUID()),
     eventType: String(event.eventType || "production_event"),
     occurredAt: event.occurredAt || new Date().toISOString(),
-    ...event,
   };
 }
 
@@ -34,22 +34,26 @@ export class FilePI5Repository {
   constructor({ dataDir = process.env.PI5_DATA_DIR || join(process.cwd(), ".runtime", "pi5") } = {}) {
     this.dataDir = dataDir;
     this.eventsPath = join(dataDir, "production-events.jsonl");
-    this.ids = null;
+    this.hashes = null;
   }
 
   async init() {
     await mkdir(this.dataDir, { recursive: true });
-    if (!this.ids) {
-      this.ids = new Set((await this.list()).map((event) => event.id));
+    if (!this.hashes) {
+      this.hashes = new Map((await this.list()).map((event) => [event.id, eventHash(event)]));
     }
   }
 
   async append(input = {}) {
     await this.init();
     const event = normalizeEvent(input);
-    if (this.ids.has(event.id)) return event;
+    const hash = eventHash(event);
+    if (this.hashes.has(event.id)) {
+      if (this.hashes.get(event.id) !== hash) throw new Error(`Conflito de idempotência no evento ${event.id}`);
+      return event;
+    }
     await appendFile(this.eventsPath, `${JSON.stringify(event)}\n`, "utf8");
-    this.ids.add(event.id);
+    this.hashes.set(event.id, hash);
     return event;
   }
 
@@ -72,9 +76,12 @@ export class FilePI5Repository {
     const predictions = events.filter((item) => item.eventType === "prediction");
     const feedback = events.filter((item) => item.eventType === "expert_feedback" && item.labelStatus === "validated");
     const categories = {};
+    const gates = {};
     for (const event of predictions) {
       const category = event.category || event.prediction?.category || "generic";
+      const gate = event.gateState || event.prediction?.gate?.state || "unknown";
       categories[category] = (categories[category] || 0) + 1;
+      gates[gate] = (gates[gate] || 0) + 1;
     }
     return {
       predictions: predictions.length,
@@ -83,6 +90,7 @@ export class FilePI5Repository {
       readyForTraining: feedback.length >= minimumForTraining,
       lastEventAt: events.at(-1)?.occurredAt || null,
       categories,
+      gates,
       persistenceMode: process.env.PI5_DATA_DIR ? "configured-directory" : "ephemeral-demo",
       durable: Boolean(process.env.PI5_DATA_DIR),
     };
@@ -125,17 +133,27 @@ export class PostgresPI5Repository {
         occurred_at TIMESTAMPTZ NOT NULL,
         entity_id TEXT,
         prediction_id TEXT,
+        snapshot_id TEXT,
+        methodology_version TEXT,
+        benchmark_version TEXT,
         model_version TEXT,
         category TEXT,
+        gate_state TEXT,
         label_status TEXT,
         payload JSONB NOT NULL,
         payload_hash TEXT NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE pi5_events ADD COLUMN IF NOT EXISTS snapshot_id TEXT;
+      ALTER TABLE pi5_events ADD COLUMN IF NOT EXISTS methodology_version TEXT;
+      ALTER TABLE pi5_events ADD COLUMN IF NOT EXISTS benchmark_version TEXT;
+      ALTER TABLE pi5_events ADD COLUMN IF NOT EXISTS gate_state TEXT;
       CREATE INDEX IF NOT EXISTS pi5_events_event_type_idx ON pi5_events(event_type);
       CREATE INDEX IF NOT EXISTS pi5_events_occurred_at_idx ON pi5_events(occurred_at);
       CREATE INDEX IF NOT EXISTS pi5_events_prediction_id_idx ON pi5_events(prediction_id);
+      CREATE INDEX IF NOT EXISTS pi5_events_snapshot_id_idx ON pi5_events(snapshot_id);
       CREATE INDEX IF NOT EXISTS pi5_events_category_idx ON pi5_events(category);
+      CREATE INDEX IF NOT EXISTS pi5_events_gate_state_idx ON pi5_events(gate_state);
       CREATE INDEX IF NOT EXISTS pi5_events_label_status_idx ON pi5_events(label_status);
     `);
     this.initialized = true;
@@ -151,20 +169,25 @@ export class PostgresPI5Repository {
       event.occurredAt,
       event.entityId || null,
       event.predictionId || event.prediction?.predictionId || null,
+      event.snapshotId || event.prediction?.snapshot?.snapshotId || null,
+      event.methodologyVersion || event.prediction?.methodologyVersion || null,
+      event.benchmarkVersion || event.prediction?.benchmarkVersion || null,
       event.modelVersion || event.prediction?.modelVersion || null,
       event.category || event.prediction?.category || null,
+      event.gateState || event.prediction?.gate?.state || null,
       event.labelStatus || null,
       event,
       hash,
     ];
     const result = await this.pool.query(`
       INSERT INTO pi5_events (
-        id, event_type, occurred_at, entity_id, prediction_id,
-        model_version, category, label_status, payload, payload_hash
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)
+        id, event_type, occurred_at, entity_id, prediction_id, snapshot_id,
+        methodology_version, benchmark_version, model_version, category,
+        gate_state, label_status, payload, payload_hash
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14)
       ON CONFLICT (id) DO NOTHING
       RETURNING id
-    `, [...values.slice(0, 8), JSON.stringify(values[8]), values[9]]);
+    `, [...values.slice(0, 12), JSON.stringify(values[12]), values[13]]);
     if (!result.rowCount) {
       const existing = await this.pool.query("SELECT payload_hash FROM pi5_events WHERE id=$1", [event.id]);
       if (existing.rows[0]?.payload_hash !== hash) throw new Error(`Conflito de idempotência no evento ${event.id}`);
@@ -205,6 +228,13 @@ export class PostgresPI5Repository {
       GROUP BY COALESCE(category, 'generic')
       ORDER BY total DESC
     `);
+    const gateRows = await this.pool.query(`
+      SELECT COALESCE(gate_state, 'unknown') AS gate_state, COUNT(*)::int AS total
+      FROM pi5_events
+      WHERE event_type='prediction'
+      GROUP BY COALESCE(gate_state, 'unknown')
+      ORDER BY total DESC
+    `);
     const predictions = counts.rows[0]?.predictions || 0;
     const validatedFeedback = counts.rows[0]?.validated_feedback || 0;
     return {
@@ -214,6 +244,7 @@ export class PostgresPI5Repository {
       readyForTraining: validatedFeedback >= minimumForTraining,
       lastEventAt: counts.rows[0]?.last_event_at || null,
       categories: Object.fromEntries(categoryRows.rows.map((row) => [row.category, row.total])),
+      gates: Object.fromEntries(gateRows.rows.map((row) => [row.gate_state, row.total])),
       persistenceMode: "postgresql",
       durable: true,
     };

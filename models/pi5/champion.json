@@ -1,8 +1,9 @@
 {
   "methodology": "PHYLLOS Impact 5",
-  "methodologyVersion": "0.1.0",
-  "modelVersion": "pi5-rules-0.1.0",
-  "modelType": "rules_baseline",
+  "methodologyVersion": "0.2.0",
+  "benchmarkVersion": "pi5-benchmarks-0.1.0",
+  "modelVersion": "pi5-rules-0.2.0",
+  "modelType": "governed_rules_baseline",
   "status": "champion",
   "trainedExamples": 0,
   "weights": {
@@ -20,6 +21,11 @@
     "calca": { "carbonKg": 7.5, "waterL": 4200, "wastePct": 16, "durabilityUses": 90 },
     "vestido": { "carbonKg": 6, "waterL": 3600, "wastePct": 16, "durabilityUses": 55 },
     "jaqueta": { "carbonKg": 12, "waterL": 5000, "wastePct": 18, "durabilityUses": 110 }
+  },
+  "calibrationPolicy": {
+    "maxAbsoluteAdjustment": 0.5,
+    "preserveCriticalCap": true,
+    "mayChangePublicationGate": false
   },
   "promotionPolicy": {
     "minValidatedExamples": 70,

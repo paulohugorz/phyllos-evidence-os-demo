@@ -1,6 +1,5 @@
 from __future__ import annotations
 import argparse, copy, time
-from pathlib import Path
 from .common import load_events, training_rows, load_json, save_json
 from .train import fit
 from .evaluate import evaluate, promotion_decision
@@ -8,12 +7,23 @@ from .monitor import monitor
 
 def run(events_path, champion_path, challenger_path, report_path, allow_promote=False):
     events=load_events(events_path); rows=training_rows(events); champion=load_json(champion_path,{})
-    challenger,train_rows,test_rows=fit(rows)
+    max_adjustment=float(champion.get("calibrationPolicy",{}).get("maxAbsoluteAdjustment",.5))
+    challenger,train_rows,test_rows=fit(rows,max_adjustment=max_adjustment)
     evaluation=evaluate(challenger,test_rows)
-    decision=promotion_decision(evaluation,champion.get("promotionPolicy",{}),len(rows))
+    policy={**champion.get("promotionPolicy",{}),"maxCalibrationAdjustment":max_adjustment}
+    decision=promotion_decision(evaluation,policy,len(rows),challenger)
     monitoring=monitor(events,rows)
     if challenger:
-        candidate=copy.deepcopy(champion); candidate.update({"modelVersion":f"pi5-calibrated-{time.strftime('%Y%m%d%H%M%S',time.gmtime())}","modelType":"rules_plus_linear_calibration","status":"challenger","trainedExamples":len(rows),"calibration":challenger,"evaluation":evaluation,"promotionDecision":decision})
+        candidate=copy.deepcopy(champion)
+        candidate.update({
+            "modelVersion":f"pi5-calibrated-{time.strftime('%Y%m%d%H%M%S',time.gmtime())}",
+            "modelType":"rules_plus_restricted_residual_calibration",
+            "status":"challenger",
+            "trainedExamples":len(rows),
+            "calibration":challenger,
+            "evaluation":evaluation,
+            "promotionDecision":decision,
+        })
         save_json(challenger_path,candidate)
         if allow_promote and decision["promote"]:
             candidate["status"]="champion"; candidate["promotedAt"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()); save_json(champion_path,candidate)

@@ -16,6 +16,7 @@ test("repositório local preserva eventos e idempotência", async () => {
     const events = await repository.list();
     assert.equal(events.length, 1);
     assert.equal(events[0].id, "event-1");
+    await assert.rejects(() => repository.append({ ...event, entityId: "piece-2" }), /Conflito de idempotência/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -28,11 +29,13 @@ test("PI5MLOpsStore calcula, persiste e resume feedback validado", async () => {
     const store = new PI5MLOpsStore({ repository, modelPath: join(dir, "missing-model.json") });
     const prediction = await store.predict({ entityId: "piece-2", category: "camisa", carbonKg: 3.2, waterL: 2000, wastePct: 10, coverage: 82, confidence: 75 });
     assert.ok(prediction.predictionId);
+    assert.ok(prediction.snapshot?.snapshotId);
     await store.feedback({ predictionId: prediction.predictionId, expertScore: 3.7, validatedBy: "especialista-1" });
     const summary = await store.summary();
     assert.equal(summary.predictions, 1);
     assert.equal(summary.validatedFeedback, 1);
     assert.equal(summary.readyForTraining, false);
+    assert.equal(summary.gates[prediction.gate.state], 1);
     const exported = await store.exportJsonl();
     assert.match(exported, /expert_feedback/);
   } finally {

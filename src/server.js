@@ -77,6 +77,7 @@ async function api(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/model") return json(res, 200, await pi5MLOps.currentModel());
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/summary") return json(res, 200, await pi5MLOps.summary());
   if (req.method === "POST" && url.pathname === "/api/v1/pi5/predict") return json(res, 201, await pi5MLOps.predict(await body(req)));
+  if (req.method === "POST" && url.pathname === "/api/v1/pi5/replay") { const input = await body(req); return json(res, 200, await pi5MLOps.replay(input.snapshot || input)); }
   if (req.method === "POST" && url.pathname === "/api/v1/pi5/events") return json(res, 201, await pi5MLOps.append("production_event", await body(req)));
   if (req.method === "POST" && url.pathname === "/api/v1/pi5/feedback") return json(res, 201, await pi5MLOps.feedback(await body(req)));
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/export") {

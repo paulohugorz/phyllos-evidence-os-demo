@@ -1,23 +1,52 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://phyllos.local/contracts/pi5-production-event.schema.json",
-  "title": "PHYLLOS PI5 Production Event",
+  "title": "PHYLLOS PI5 Governed Event",
   "type": "object",
   "required": ["id", "eventType", "occurredAt"],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
-    "eventType": { "enum": ["prediction", "expert_feedback", "data_correction", "model_decision"] },
+    "eventType": { "enum": ["prediction", "expert_feedback", "data_correction", "model_decision", "production_event", "conflict_resolution"] },
     "occurredAt": { "type": "string", "format": "date-time" },
     "entityId": { "type": "string" },
     "predictionId": { "type": "string" },
+    "snapshotId": { "type": "string", "pattern": "^pi5-snapshot:" },
+    "methodologyVersion": { "type": "string" },
+    "benchmarkVersion": { "type": "string" },
     "modelVersion": { "type": "string" },
     "category": { "type": "string" },
+    "gateState": { "enum": ["insufficient_data", "experimental", "estimated", "contextualized", "professionally_reviewed", "blocked", "revoked"] },
     "inputs": { "type": "object" },
-    "prediction": { "type": "object" },
+    "prediction": {
+      "type": "object",
+      "properties": {
+        "predictionId": { "type": "string" },
+        "score": { "type": "number", "minimum": 0, "maximum": 5 },
+        "baseScore": { "type": "number", "minimum": 0, "maximum": 5 },
+        "scoreInterval": {
+          "type": "object",
+          "required": ["lower", "upper"],
+          "properties": {
+            "lower": { "type": "number", "minimum": 0, "maximum": 5 },
+            "upper": { "type": "number", "minimum": 0, "maximum": 5 }
+          }
+        },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 100 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 100 },
+        "provenance": { "type": "object" },
+        "gate": { "type": "object" },
+        "snapshot": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
     "expertScore": { "type": "number", "minimum": 0, "maximum": 5 },
-    "dimensionLabels": { "type": "object" },
+    "dimensionLabels": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 5 }
+    },
     "validatedBy": { "type": "string" },
-    "labelStatus": { "enum": ["pending", "validated", "rejected"] },
+    "validator": { "type": "object" },
+    "labelStatus": { "enum": ["pending", "validated", "rejected", "conflicted"] },
     "notes": { "type": "string" }
   },
   "additionalProperties": true

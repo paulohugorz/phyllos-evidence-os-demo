@@ -3,6 +3,7 @@ import hashlib, json, math
 from pathlib import Path
 
 FEATURE_ORDER = ["base_score", "climate", "water", "chemicals", "materials", "waste_circularity", "durability", "coverage", "confidence"]
+DEFAULT_MAX_ADJUSTMENT = .5
 
 def load_json(path, fallback=None):
     p=Path(path)
@@ -28,17 +29,23 @@ def training_rows(events):
     for event in events:
         if event.get("eventType")=="prediction":
             pred=event.get("prediction", {})
-            pid=pred.get("predictionId") or event.get("id")
+            pid=pred.get("predictionId") or event.get("predictionId") or event.get("id")
             predictions[pid]=event
     rows=[]
+    seen=set()
     for feedback in events:
         if feedback.get("eventType")!="expert_feedback" or feedback.get("labelStatus")!="validated": continue
+        feedback_id=feedback.get("validationId") or feedback.get("id")
+        if feedback_id in seen: continue
         pred=predictions.get(feedback.get("predictionId"))
         if not pred: continue
         result=pred.get("prediction", {})
+        if result.get("gate",{}).get("state") in {"blocked","insufficient_data","revoked"}: continue
         dims=result.get("dimensions", {})
+        base=float(result.get("baseScore", result.get("score", 0)))
+        expert=float(feedback.get("expertScore"))
         features={
-            "base_score": float(result.get("score", 0)),
+            "base_score": base,
             "climate": float(dims.get("climate", 0)),
             "water": float(dims.get("water", 0)),
             "chemicals": float(dims.get("chemicals", 0)),
@@ -48,18 +55,37 @@ def training_rows(events):
             "coverage": float(result.get("coverage", 0))/100,
             "confidence": float(result.get("confidence", 0))/100,
         }
-        rows.append({"id": feedback.get("id"), "prediction_id": feedback.get("predictionId"), "category": pred.get("category", "generic"), "x": [features[k] for k in FEATURE_ORDER], "y": float(feedback.get("expertScore")), "base": features["base_score"]})
+        rows.append({
+            "id": feedback_id,
+            "prediction_id": feedback.get("predictionId"),
+            "entity_id": pred.get("entityId"),
+            "category": pred.get("category", result.get("category", "generic")),
+            "x": [features[k] for k in FEATURE_ORDER],
+            "y": expert,
+            "base": base,
+            "adjustment": expert-base,
+        })
+        seen.add(feedback_id)
     return rows
 
 def split_rows(rows, test_ratio=.2):
     train=[]; test=[]
     for row in rows:
-        digest=int(hashlib.sha256(str(row["prediction_id"]).encode()).hexdigest()[:8],16)
+        split_key=row.get("entity_id") or row.get("prediction_id")
+        digest=int(hashlib.sha256(str(split_key).encode()).hexdigest()[:8],16)
         (test if digest % 100 < int(test_ratio*100) else train).append(row)
     if rows and not test: test=[rows[-1]]; train=rows[:-1]
     return train,test
 
-def predict_linear(model, x):
+def predict_adjustment(model, x):
+    z=[(v-m)/max(1e-8,s) for v,m,s in zip(x, model["means"], model["stds"])]
+    adjustment=model["intercept"]+sum(w*v for w,v in zip(model["weights"], z))
+    limit=float(model.get("maxAbsoluteAdjustment", DEFAULT_MAX_ADJUSTMENT))
+    return max(-limit,min(limit,adjustment))
+
+def predict_linear(model, x, base=0):
+    if model.get("target")=="residual_adjustment":
+        return max(0.0,min(5.0,float(base)+predict_adjustment(model,x)))
     z=[(v-m)/max(1e-8,s) for v,m,s in zip(x, model["means"], model["stds"])]
     y=model["intercept"]+sum(w*v for w,v in zip(model["weights"], z))
     return max(0.0,min(5.0,y))
