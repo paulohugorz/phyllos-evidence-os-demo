@@ -1,0 +1,53 @@
+name: PHYLLOS PI5 MLOps
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 8 * * 1"
+  push:
+    paths:
+      - "data/pi5/**"
+      - "mlops/pi5/**"
+      - "models/pi5/**"
+      - "tests/test_pi5_pipeline.py"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  train-evaluate-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Testar esteira
+        run: python -m unittest tests/test_pi5_pipeline.py
+      - name: Treinar challenger, avaliar e monitorar
+        run: python -m mlops.pi5.orchestrate --allow-promote
+      - name: Publicar relatório como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: pi5-mlops-report-${{ github.run_id }}
+          path: |
+            reports/pi5/latest.json
+            models/pi5/challenger.json
+          if-no-files-found: warn
+      - name: Abrir PR quando houver promoção ou novo challenger
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "Nenhuma alteração de modelo."
+            exit 0
+          fi
+          BRANCH="pi5/model-candidate-${GITHUB_RUN_ID}"
+          git config user.name "phyllos-mlops-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add models/pi5 reports/pi5
+          git commit -m "Atualiza candidato PI5 e relatório MLOps"
+          git push origin "$BRANCH"
+          gh pr create --title "PI5: novo candidato de modelo" --body "Treino, avaliação, monitoramento e gates executados automaticamente. Revise o relatório antes de mesclar." --base main --head "$BRANCH"

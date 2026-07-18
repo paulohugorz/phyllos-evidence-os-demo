@@ -1,0 +1,30 @@
+{
+  "methodology": "PHYLLOS Impact 5",
+  "methodologyVersion": "0.1.0",
+  "modelVersion": "pi5-rules-0.1.0",
+  "modelType": "rules_baseline",
+  "status": "champion",
+  "trainedExamples": 0,
+  "weights": {
+    "climate": 0.3,
+    "water": 0.2,
+    "chemicals": 0.15,
+    "materials": 0.15,
+    "wasteCircularity": 0.1,
+    "durability": 0.1
+  },
+  "benchmarks": {
+    "generic": { "carbonKg": 4, "waterL": 2500, "wastePct": 15, "durabilityUses": 40 },
+    "camiseta": { "carbonKg": 3.2, "waterL": 2200, "wastePct": 12, "durabilityUses": 40 },
+    "camisa": { "carbonKg": 4.5, "waterL": 3200, "wastePct": 14, "durabilityUses": 55 },
+    "calca": { "carbonKg": 7.5, "waterL": 4200, "wastePct": 16, "durabilityUses": 90 },
+    "vestido": { "carbonKg": 6, "waterL": 3600, "wastePct": 16, "durabilityUses": 55 },
+    "jaqueta": { "carbonKg": 12, "waterL": 5000, "wastePct": 18, "durabilityUses": 110 }
+  },
+  "promotionPolicy": {
+    "minValidatedExamples": 70,
+    "minImprovementPct": 2,
+    "maxGlobalMae": 0.55,
+    "maxSubgroupMae": 0.85
+  }
+}

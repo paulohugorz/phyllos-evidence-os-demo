@@ -1,0 +1,42 @@
+{
+  "events": 0,
+  "validatedExamples": 0,
+  "trainExamples": 0,
+  "testExamples": 0,
+  "evaluation": {
+    "challenger": {
+      "n": 0,
+      "mae": null,
+      "rmse": null,
+      "byCategory": {}
+    },
+    "champion": {
+      "n": 0,
+      "mae": null,
+      "rmse": null,
+      "byCategory": {}
+    }
+  },
+  "promotionDecision": {
+    "promote": false,
+    "reasons": [
+      "minimum_validated_examples_not_met",
+      "holdout_empty"
+    ],
+    "improvementPct": 0,
+    "maxSubgroupMae": 0
+  },
+  "monitoring": {
+    "predictionCount": 0,
+    "validatedCount": 0,
+    "recentMeanScore": null,
+    "previousMeanScore": null,
+    "absoluteScoreDrift": null,
+    "driftStatus": "ok",
+    "categories": {},
+    "dataQuality": {
+      "orphanFeedback": 0,
+      "trainingCoveragePct": 0.0
+    }
+  }
+}

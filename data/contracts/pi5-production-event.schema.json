@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-production-event.schema.json",
+  "title": "PHYLLOS PI5 Production Event",
+  "type": "object",
+  "required": ["id", "eventType", "occurredAt"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "eventType": { "enum": ["prediction", "expert_feedback", "data_correction", "model_decision"] },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "entityId": { "type": "string" },
+    "predictionId": { "type": "string" },
+    "modelVersion": { "type": "string" },
+    "category": { "type": "string" },
+    "inputs": { "type": "object" },
+    "prediction": { "type": "object" },
+    "expertScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "dimensionLabels": { "type": "object" },
+    "validatedBy": { "type": "string" },
+    "labelStatus": { "enum": ["pending", "validated", "rejected"] },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

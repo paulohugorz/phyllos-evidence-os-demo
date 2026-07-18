@@ -5,9 +5,11 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceStore } from "./store.js";
+import { PI5MLOpsStore } from "./pi5-mlops.js";
 
 const root = fileURLToPath(new URL("../public/", import.meta.url));
 const store = new EvidenceStore();
+const pi5MLOps = new PI5MLOpsStore();
 const tenant = store.createTenant({ name: "PHYLLOS Demo", slug: "phyllos-demo" });
 const ctx = { tenantId: tenant.id, userId: "demo-analyst", role: "client_admin" };
 const org = store.createOrganization(ctx, { name: "Marca Horizonte", externalCode: "MH-01" });
@@ -71,11 +73,23 @@ async function api(req, res, url) {
     const dossier = store.freezeDossier(ctx, { name: "Dossiê do piloto", productIds: products.map((x) => x.id) });
     return json(res, 201, { id: dossier.id, sha256: dossier.sha256, frozenAt: dossier.frozenAt, productCount: products.length, limitation: dossier.snapshot.limitations });
   }
+  if (req.method === "GET" && url.pathname === "/api/v1/pi5/model") return json(res, 200, await pi5MLOps.currentModel());
+  if (req.method === "GET" && url.pathname === "/api/v1/pi5/summary") return json(res, 200, await pi5MLOps.summary());
+  if (req.method === "POST" && url.pathname === "/api/v1/pi5/predict") return json(res, 201, await pi5MLOps.predict(await body(req)));
+  if (req.method === "POST" && url.pathname === "/api/v1/pi5/events") return json(res, 201, await pi5MLOps.append("production_event", await body(req)));
+  if (req.method === "POST" && url.pathname === "/api/v1/pi5/feedback") return json(res, 201, await pi5MLOps.feedback(await body(req)));
+  if (req.method === "GET" && url.pathname === "/api/v1/pi5/export") {
+    const content = await pi5MLOps.exportJsonl();
+    res.writeHead(200, { "content-type": "application/x-ndjson; charset=utf-8", "content-disposition": "attachment; filename=phyllos-pi5-events.jsonl", "cache-control": "no-store" });
+    res.end(content);
+    return;
+  }
   return json(res, 404, { error: "Endpoint não encontrado" });
 }
 
 const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
 const productionAssetsVersion = "20260717-2";
+const pi5AssetsVersion = "20260718-pi5-1";
 const accessibilityAssetsVersion = "20260717-visual-2";
 
 function enhanceIndexHtml(html) {
@@ -94,6 +108,18 @@ function enhanceIndexHtml(html) {
   }
   if (!next.includes("production-accessibility.js")) {
     next = next.replace("</body>", `  <script type="module" src="/production-accessibility.js?v=${accessibilityAssetsVersion}"></script>
+</body>`);
+  }
+  if (!next.includes("pi5-mlops.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/pi5-mlops.css?v=${pi5AssetsVersion}">
+</head>`);
+  }
+  if (!next.includes("pi5-methodology.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/pi5-methodology.js?v=${pi5AssetsVersion}"></script>
+</body>`);
+  }
+  if (!next.includes("pi5-mlops-ui.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/pi5-mlops-ui.js?v=${pi5AssetsVersion}"></script>
 </body>`);
   }
   return next;
