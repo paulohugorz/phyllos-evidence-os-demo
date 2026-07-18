@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-expert-label.schema.json",
+  "title": "PHYLLOS PI5 Expert Label",
+  "type": "object",
+  "required": [
+    "id",
+    "labelingSessionId",
+    "expertActorId",
+    "dimensionScores",
+    "evidenceQualityScore",
+    "reviewerConfidence",
+    "reviewDecision",
+    "payloadHash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "labelingSessionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expertActorId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "globalScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "dimensionScores": {
+      "type": "object",
+      "required": [
+        "climate",
+        "water",
+        "chemicals",
+        "materials",
+        "wasteCircularity",
+        "durability"
+      ],
+      "properties": {
+        "climate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "water": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "chemicals": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "materials": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "wasteCircularity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "durability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "categoryLabel": {
+      "type": "string"
+    },
+    "evidenceQualityScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "reviewerConfidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "reviewDecision": {
+      "enum": [
+        "accept",
+        "accept_with_warning",
+        "insufficient_evidence",
+        "reject"
+      ]
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 5000
+    },
+    "payloadHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

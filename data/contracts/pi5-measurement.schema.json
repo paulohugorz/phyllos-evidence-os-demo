@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-measurement.schema.json",
+  "title": "PHYLLOS PI5 Measurement",
+  "type": "object",
+  "required": [
+    "id",
+    "sampleId",
+    "metricCode",
+    "sourceType",
+    "epistemicStatus",
+    "observedAt",
+    "recordedBy",
+    "idempotencyKey",
+    "payloadHash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sampleId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metricCode": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+$"
+    },
+    "numericValue": {
+      "type": "number"
+    },
+    "textValue": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "sourceType": {
+      "enum": [
+        "instrument_measured",
+        "manual_measured",
+        "laboratory",
+        "third_party_document",
+        "supplier_declaration",
+        "brand_declaration",
+        "model_inference",
+        "derived",
+        "reference_default"
+      ]
+    },
+    "epistemicStatus": {
+      "enum": [
+        "unknown",
+        "declared",
+        "documented",
+        "measured",
+        "independently_verified",
+        "derived",
+        "conflicting",
+        "rejected"
+      ]
+    },
+    "uncertainty": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "type": "number"
+        },
+        "upper": {
+          "type": "number"
+        },
+        "stddev": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recordedBy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8
+    },
+    "payloadHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "evidenceIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "numericValue"
+      ]
+    },
+    {
+      "required": [
+        "textValue"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

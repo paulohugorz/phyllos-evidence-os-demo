@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-dataset-manifest.schema.json",
+  "title": "PHYLLOS PI5 Dataset Manifest",
+  "type": "object",
+  "required": [
+    "datasetName",
+    "version",
+    "createdAt",
+    "protocolVersion",
+    "recordCount",
+    "splitCounts",
+    "contentHash",
+    "files",
+    "qualitySummary"
+  ],
+  "properties": {
+    "datasetName": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocolVersion": {
+      "type": "string"
+    },
+    "recordCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "splitCounts": {
+      "type": "object"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "files": {
+      "type": "object"
+    },
+    "qualitySummary": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendedUses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prohibitedUses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

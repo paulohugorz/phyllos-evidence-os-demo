@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: phyllos_pi5
+      POSTGRES_USER: phyllos
+      POSTGRES_PASSWORD: local-development-only
+    ports:
+      - "54329:5432"
+    volumes:
+      - phyllos_pi5_training_data:/var/lib/postgresql/data
+      - ./migrations/001_pi5_events.sql:/docker-entrypoint-initdb.d/001_pi5_events.sql:ro
+      - ./migrations/002_pi5_training_foundation.sql:/docker-entrypoint-initdb.d/002_pi5_training_foundation.sql:ro
+      - ./migrations/003_pi5_training_views.sql:/docker-entrypoint-initdb.d/003_pi5_training_views.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phyllos -d phyllos_pi5"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  phyllos_pi5_training_data:
