@@ -1,0 +1,89 @@
+{
+  "registry_version": "1.0.0",
+  "generated_at": "2026-07-18T00:00:00-03:00",
+  "policy": {
+    "aggregation_rule": "Resultados somente podem ser agregados quando configuration_id, prompt_version e dataset_version forem compatíveis.",
+    "missing_fields_rule": "Configurações incompletas são bloqueadas para avaliação confirmatória."
+  },
+  "configurations": [
+    {
+      "configuration_id": "pi5-smoke-synthetic-v3",
+      "official_model_name": "PI5 Synthetic Linear Baseline v3",
+      "model_family": "synthetic_linear_baseline",
+      "repository_or_catalog": "private-local-package",
+      "checkpoint_version_or_hash": "da8e7112ec28e9421bc4ba698cf6ff342bea25a60ab6cfcd8570e475df7dcaeb",
+      "obtained_at": "2026-07-18",
+      "runtime": "Node.js 22",
+      "libraries": {
+        "runtime": "node",
+        "external_dependencies": []
+      },
+      "quantization": "not_applicable",
+      "hardware": {
+        "environment": "isolated_test_environment",
+        "details": "not benchmarked"
+      },
+      "memory_available": null,
+      "context_window": null,
+      "chat_template": null,
+      "system_prompt_hash": null,
+      "generation": {
+        "deterministic": true,
+        "temperature": 0,
+        "seed": "pi5-synthetic-v3"
+      },
+      "tools": [],
+      "rag_version": null,
+      "knowledge_graph_version": null,
+      "prompt_version": "not_applicable",
+      "validators_version": "pi5-agent-execution-v3",
+      "postprocessors_version": "pi5-agent-execution-v3",
+      "execution_condition": "synthetic infrastructure smoke test",
+      "dataset_version": "pi5-synthetic-v3",
+      "completeness_status": "complete_for_smoke_test",
+      "promotion_scope": "infrastructure_validation_only"
+    },
+    {
+      "configuration_id": "phi5-candidate-001",
+      "official_model_name": "UNRESOLVED",
+      "model_family": "Phi-5 candidate",
+      "repository_or_catalog": "UNRESOLVED",
+      "checkpoint_version_or_hash": "UNRESOLVED",
+      "obtained_at": null,
+      "runtime": "UNRESOLVED",
+      "libraries": {},
+      "quantization": "UNRESOLVED",
+      "hardware": {},
+      "memory_available": null,
+      "context_window": null,
+      "chat_template": null,
+      "system_prompt_hash": null,
+      "generation": {},
+      "tools": [],
+      "rag_version": "UNRESOLVED",
+      "knowledge_graph_version": "UNRESOLVED",
+      "prompt_version": "UNRESOLVED",
+      "validators_version": "UNRESOLVED",
+      "postprocessors_version": "UNRESOLVED",
+      "execution_condition": "UNRESOLVED",
+      "dataset_version": null,
+      "completeness_status": "blocked_incomplete_registry",
+      "promotion_scope": "none",
+      "blocking_fields": [
+        "official_model_name",
+        "repository_or_catalog",
+        "checkpoint_version_or_hash",
+        "runtime",
+        "quantization",
+        "hardware",
+        "context_window",
+        "chat_template",
+        "system_prompt_hash",
+        "generation",
+        "rag_version",
+        "knowledge_graph_version",
+        "prompt_version"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHYLLOS — Confiabilidade PI5/Phi-5</title>
+<style>
+:root{--bg:#07110e;--panel:#0e1d18;--panel2:#13251f;--line:#294039;--text:#eef7f2;--muted:#9db4aa;--green:#8bd6af;--gold:#d8b979;--red:#ef9188;--blue:#8eafd1}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#07110e,#0b1713);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+.wrap{max-width:1450px;margin:auto;padding:24px}header{border:1px solid var(--line);border-radius:26px;padding:34px;background:radial-gradient(circle at 80% 0,rgba(139,214,175,.18),transparent 35%),#0c1915}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;color:var(--green);font-size:12px;font-weight:800}h1{font-size:clamp(36px,6vw,72px);line-height:.95;letter-spacing:-.05em;margin:12px 0}
+.lead{max-width:970px;color:#c9d9d2;font-size:18px}.alert{margin-top:20px;padding:14px 16px;border:1px solid rgba(216,185,121,.45);background:rgba(216,185,121,.09);border-radius:14px;color:#f2dfb7}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}button{border:1px solid var(--line);background:#102019;color:var(--muted);border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}button.active{background:var(--green);color:#062016}
+.page{display:none}.page.active{display:block}.grid{display:grid;gap:15px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),#0b1814);border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 12px 30px rgba(0,0,0,.13)}h2,h3{margin:0 0 10px;letter-spacing:-.025em}.kpi{font-size:34px;font-weight:850;letter-spacing:-.045em;margin:4px 0}.muted{color:var(--muted);font-size:13px}
+.badge{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850;border:1px solid}.good{color:#baf0cd;background:rgba(139,214,175,.1);border-color:rgba(139,214,175,.38)}.warn{color:#f3dea8;background:rgba(216,185,121,.1);border-color:rgba(216,185,121,.38)}.bad{color:#ffc5bf;background:rgba(239,145,136,.1);border-color:rgba(239,145,136,.38)}.neutral{color:#c7d9e9;background:rgba(142,175,209,.1);border-color:rgba(142,175,209,.38)}
+.callout{border-left:4px solid var(--green);background:#10211b;border-radius:0 14px 14px 0;padding:14px 16px;margin:10px 0}.callout.warn{border-color:var(--gold);background:rgba(216,185,121,.08)}.callout.bad{border-color:var(--red);background:rgba(239,145,136,.08)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.08em}tr:last-child td{border-bottom:0}
+.progress{height:9px;background:#20342d;border-radius:999px;overflow:hidden}.progress span{display:block;height:100%;background:var(--green);border-radius:999px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}select,input{background:#0c1915;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px}
+.scenario{display:grid;grid-template-columns:58px 1.7fr 1fr 90px 100px;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}.scenario:last-child{border-bottom:0}
+.metric-row{display:grid;grid-template-columns:170px 1fr 70px;gap:10px;align-items:center;margin:11px 0}.bar{height:11px;background:#20342d;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:var(--green)}.bar.warn span{background:var(--gold)}.bar.bad span{background:var(--red)}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#07120e;border:1px solid var(--line);padding:12px;border-radius:12px;color:#cde5da}
+footer{color:#7f978c;text-align:center;padding:22px;font-size:12px}
+@media(max-width:980px){.g4,.g3,.g2{grid-template-columns:1fr 1fr}.scenario{grid-template-columns:50px 1fr 90px}.scenario .hide-sm{display:none}}
+@media(max-width:650px){.wrap{padding:12px}header{padding:24px}.g4,.g3,.g2{grid-template-columns:1fr}.scenario{grid-template-columns:45px 1fr}.scenario .mobile-hide{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="eyebrow">PHYLLOS • Programa Experimental v1</div>
+<h1>Confiabilidade do PI5/Phi-5</h1>
+<p class="lead">Dashboard por configuração, tarefa e cenário, com intervalo de Wilson, confiabilidade conservadora, calibração, abstinência, robustez, operação e decisão de promoção.</p>
+<div class="alert"><strong>Estado atual: experimental.</strong> A execução v3 validou a infraestrutura com dados sintéticos. O Phi-5 real permanece bloqueado até o preenchimento do registro imutável de configuração e a avaliação com casos físicos de referência.</div>
+</header>
+
+<nav class="tabs">
+<button class="active" data-page="executive">Executivo</button>
+<button data-page="configuration">Configurações</button>
+<button data-page="scenarios">Cenários</button>
+<button data-page="reliability">Confiabilidade</button>
+<button data-page="calibration">Calibração</button>
+<button data-page="promotion">Promoção</button>
+</nav>
+
+<section id="executive" class="page active">
+<div class="grid g4">
+<div class="card"><span class="badge neutral">Smoke test</span><div class="kpi">101</div><div class="muted">casos sintéticos no teste</div></div>
+<div class="card"><span class="badge warn">Taxa observada</span><div class="kpi">73.3%</div><div class="muted">erro global ≤ 0,10</div></div>
+<div class="card"><span class="badge warn">Conservadora</span><div class="kpi">63.9%</div><div class="muted">limite inferior de Wilson 95%</div></div>
+<div class="card"><span class="badge bad">Produção</span><div class="kpi">Bloqueada</div><div class="muted">shadow mode privado permitido</div></div>
+</div>
+<div class="grid g2" style="margin-top:15px">
+<div class="card">
+<h2>Decisão consolidada</h2>
+<div class="callout"><strong>Infraestrutura aprovada.</strong><br>Dataset, split por linhagem, treino, avaliação, hashes e quarentena funcionaram.</div>
+<div class="callout warn"><strong>Regressor promissor apenas no sintético.</strong><br>MAE 0.073, R² 0.847.</div>
+<div class="callout bad"><strong>Confiabilidade real não demonstrada.</strong><br>Não há teste físico cego, avaliação de alucinação, risco seletivo ou telemetria operacional.</div>
+</div>
+<div class="card">
+<h2>O que falta para mensurar o modelo real</h2>
+<table>
+<tr><td>Registro Phi-5 completo</td><td><span class="badge bad">bloqueado</span></td></tr>
+<tr><td>Casos físicos ouro</td><td><span class="badge bad">0</span></td></tr>
+<tr><td>Teste cego congelado</td><td><span class="badge bad">pendente</span></td></tr>
+<tr><td>Abstinência e risco seletivo</td><td><span class="badge warn">não instrumentados</span></td></tr>
+<tr><td>Latência, memória e custo</td><td><span class="badge warn">não instrumentados</span></td></tr>
+<tr><td>Testes adversariais</td><td><span class="badge warn">planejados</span></td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<section id="configuration" class="page">
+<div class="grid g2">
+<div class="card">
+<h2>pi5-smoke-synthetic-v3</h2>
+<span class="badge good">completo para smoke test</span>
+<table>
+<tr><td>Modelo</td><td>PI5 Synthetic Linear Baseline v3</td></tr>
+<tr><td>Runtime</td><td>Node.js 22</td></tr>
+<tr><td>Dataset</td><td>pi5-synthetic-v3</td></tr>
+<tr><td>Quantização</td><td>não aplicável</td></tr>
+<tr><td>Escopo</td><td>validação de infraestrutura</td></tr>
+</table>
+</div>
+<div class="card">
+<h2>phi5-candidate-001</h2>
+<span class="badge bad">registro incompleto</span>
+<p>Não pode entrar em avaliação confirmatória antes do registro de checkpoint, runtime, quantização, hardware, contexto, template, prompt, geração, RAG, grafo e pós-processadores.</p>
+<div class="progress"><span style="width:10%;background:var(--red)"></span></div>
+<div class="muted" style="margin-top:7px">Completude estimada: 10%</div>
+</div>
+</div>
+</section>
+
+<section id="scenarios" class="page">
+<div class="card">
+<h2>Matriz experimental obrigatória</h2>
+<div class="filters">
+<select id="riskFilter"><option value="">Todos os riscos</option><option>baixo</option><option>médio</option><option>alto</option><option>crítico</option></select>
+<select id="statusFilter"><option value="">Todos os estados</option><option value="planned">planejado</option><option value="smoke_test_executed_partial">executado parcialmente</option><option value="blocked_until_configuration_registry">bloqueado</option></select>
+</div>
+<div id="scenarioRows"></div>
+</div>
+</section>
+
+<section id="reliability" class="page">
+<div class="grid g4">
+<div class="card"><div class="muted">Sucesso observado</div><div class="kpi">73.3%</div></div>
+<div class="card"><div class="muted">Wilson inferior</div><div class="kpi">63.9%</div></div>
+<div class="card"><div class="muted">Wilson superior</div><div class="kpi">80.9%</div></div>
+<div class="card"><div class="muted">Definição</div><div class="kpi">±0,10</div></div>
+</div>
+<div class="grid g2" style="margin-top:15px">
+<div class="card">
+<h2>Por que usar Wilson?</h2>
+<p>A taxa observada sozinha ignora o tamanho da amostra. O limite inferior de Wilson representa a estimativa operacional conservadora exigida pelo charter.</p>
+<div class="formula">p̂ = sucessos / casos válidos<br>confiabilidade mínima = limite inferior do IC 95%</div>
+<div class="callout warn"><strong>Leitura do smoke test:</strong><br>apesar de 73.3% observados, a confiabilidade conservadora é 63.9%.</div>
+</div>
+<div class="card">
+<h2>Calculadora de Wilson</h2>
+<label>Sucessos <input id="wins" type="number" value="74" min="0"></label>
+<label>Total <input id="total" type="number" value="101" min="1"></label>
+<button id="calcWilson">Calcular</button>
+<div id="wilsonResult" class="callout" style="margin-top:12px"></div>
+</div>
+</div>
+</section>
+
+<section id="calibration" class="page">
+<div class="grid g4">
+<div class="card"><div class="muted">ECE</div><div class="kpi">0.050</div><span class="badge warn">limite</span></div>
+<div class="card"><div class="muted">Brier</div><div class="kpi">0.200</div><span class="badge bad">recalibrar</span></div>
+<div class="card"><div class="muted">Confiança média</div><div class="kpi">78.3%</div></div>
+<div class="card"><div class="muted">Acerto observado</div><div class="kpi">73.3%</div></div>
+</div>
+<div class="grid g2" style="margin-top:15px">
+<div class="card"><h2>Intervalo preditivo</h2>
+<div class="metric-row"><span>Alvo nominal</span><div class="bar"><span style="width:90%"></span></div><strong>90%</strong></div>
+<div class="metric-row"><span>Cobertura real</span><div class="bar warn"><span style="width:84.2%"></span></div><strong>84.2%</strong></div>
+<p class="muted">A faixa está estreita demais para o alvo definido.</p></div>
+<div class="card"><h2>Classificação</h2>
+<div class="metric-row"><span>Top-1</span><div class="bar bad"><span style="width:54.5%"></span></div><strong>54.5%</strong></div>
+<div class="metric-row"><span>Top-3</span><div class="bar warn"><span style="width:87.1%"></span></div><strong>87.1%</strong></div>
+<div class="metric-row"><span>F1 macro</span><div class="bar bad"><span style="width:50.9%"></span></div><strong>0.509</strong></div>
+</div>
+</div>
+</section>
+
+<section id="promotion" class="page">
+<div class="grid g2">
+<div class="card">
+<h2>Decisão atual</h2>
+<div class="kpi">Experimental</div>
+<span class="badge bad">produção assistida não aprovada</span>
+<p>Shadow mode privado é permitido, desde que as saídas não produzam ações automáticas e permaneçam sujeitas à revisão profissional.</p>
+</div>
+<div class="card">
+<h2>Gates de promoção</h2>
+<table>
+<tr><th>Gate</th><th>Estado</th></tr>
+<tr><td>Configuração imutável completa</td><td><span class="badge bad">não</span></td></tr>
+<tr><td>Teste físico cego</td><td><span class="badge bad">não</span></td></tr>
+<tr><td>Wilson inferior acima da meta</td><td><span class="badge neutral">não avaliável</span></td></tr>
+<tr><td>Falha crítica dentro do limite</td><td><span class="badge neutral">não instrumentada</span></td></tr>
+<tr><td>Abstinência calibrada</td><td><span class="badge neutral">não instrumentada</span></td></tr>
+<tr><td>Telemetria e rollback</td><td><span class="badge warn">parcial</span></td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<footer>PHYLLOS PI5/Phi-5 • Programa Experimental v1 • smoke metrics 67b9f5b4350fefc1…</footer>
+</div>
+<script>
+const DATA={"metrics": {"global": {"count": 101, "mae": 0.073076, "rmse": 0.092755, "r2": 0.846659, "pearson": 0.922613, "medianAbsoluteError": 0.0593, "p90AbsoluteError": 0.1413, "bias": 0.01406}, "dimensions": {"climate": {"count": 101, "mae": 0.115671, "rmse": 0.145055, "r2": 0.894181, "pearson": 0.947718, "medianAbsoluteError": 0.0949, "p90AbsoluteError": 0.2247, "bias": 0.028139}, "water": {"count": 101, "mae": 0.111621, "rmse": 0.141537, "r2": 0.948874, "pearson": 0.974736, "medianAbsoluteError": 0.0926, "p90AbsoluteError": 0.2272, "bias": -0.002417}, "chemicals": {"count": 101, "mae": 0.110266, "rmse": 0.136229, "r2": 0.958197, "pearson": 0.978935, "medianAbsoluteError": 0.0915, "p90AbsoluteError": 0.2024, "bias": -0.003363}, "materials": {"count": 101, "mae": 0.116324, "rmse": 0.145171, "r2": 0.883382, "pearson": 0.940106, "medianAbsoluteError": 0.1045, "p90AbsoluteError": 0.2407, "bias": 0.008668}, "wasteCircularity": {"count": 101, "mae": 0.127964, "rmse": 0.156115, "r2": 0.854786, "pearson": 0.927339, "medianAbsoluteError": 0.1097, "p90AbsoluteError": 0.255, "bias": 0.026929}, "durability": {"count": 101, "mae": 0.116284, "rmse": 0.143193, "r2": 0.967419, "pearson": 0.983789, "medianAbsoluteError": 0.0917, "p90AbsoluteError": 0.2497, "bias": -0.00574}}, "thresholdPerformance": {"0.10": 0.732673, "0.25": 0.990099, "0.50": 1}, "confidence": {"definition": "P(|erro global| <= 0.1)", "brierScore": 0.200024, "expectedCalibrationError": 0.049954, "bins": [{"lower": 0.6, "upper": 0.7, "count": 4, "confidence": 0.681714, "accuracy": 0.5, "gap": 0.181714}, {"lower": 0.7, "upper": 0.8, "count": 63, "confidence": 0.762015, "accuracy": 0.761905, "gap": 0.00011}, {"lower": 0.8, "upper": 0.9, "count": 34, "confidence": 0.832693, "accuracy": 0.705882, "gap": 0.126811}], "meanDeclaredConfidence": 0.782627, "observedAccuracyAtTolerance": 0.732673}, "predictionInterval": {"quantile": 0.9, "radius": 0.1221, "empiricalCoverage": 0.841584, "meanWidth": 0.2442}, "bootstrap95": {"mae": {"lower": 0.06303, "upper": 0.084758, "iterations": 500, "confidenceLevel": 0.95}, "rmse": {"lower": 0.075829, "upper": 0.108749, "iterations": 500, "confidenceLevel": 0.95}}, "evaluationHash": "da8e7112ec28e9421bc4ba698cf6ff342bea25a60ab6cfcd8570e475df7dcaeb", "byCategory": {"calca": {"count": 17, "mae": 0.062176, "rmse": 0.078733, "r2": 0.845153, "pearson": 0.933424, "medianAbsoluteError": 0.039, "p90AbsoluteError": 0.1209, "bias": 0.030353}, "camisa": {"count": 18, "mae": 0.06095, "rmse": 0.080284, "r2": 0.882924, "pearson": 0.941636, "medianAbsoluteError": 0.04745, "p90AbsoluteError": 0.12511, "bias": 0.011139}, "camiseta": {"count": 16, "mae": 0.06725, "rmse": 0.078777, "r2": 0.85926, "pearson": 0.927777, "medianAbsoluteError": 0.06225, "p90AbsoluteError": 0.1202, "bias": -0.00815}, "generic": {"count": 18, "mae": 0.078, "rmse": 0.091311, "r2": 0.72801, "pearson": 0.881494, "medianAbsoluteError": 0.0737, "p90AbsoluteError": 0.13794, "bias": 0.037811}, "jaqueta": {"count": 16, "mae": 0.112131, "rmse": 0.139199, "r2": 0.663623, "pearson": 0.826813, "medianAbsoluteError": 0.0922, "p90AbsoluteError": 0.19055, "bias": 0.003056}, "vestido": {"count": 16, "mae": 0.059531, "rmse": 0.074231, "r2": 0.891948, "pearson": 0.953895, "medianAbsoluteError": 0.03955, "p90AbsoluteError": 0.11525, "bias": 0.006531}}, "categoryIdentification": {"accuracy": 0.544554, "top3Accuracy": 0.871287, "macroF1": 0.50917, "perCategory": {"calca": {"support": 17, "precision": 0.666667, "recall": 0.823529, "f1": 0.736842}, "camisa": {"support": 18, "precision": 0.388889, "recall": 0.388889, "f1": 0.388889}, "camiseta": {"support": 16, "precision": 0.55, "recall": 0.6875, "f1": 0.611111}, "generic": {"support": 18, "precision": 0, "recall": 0, "f1": 0}, "jaqueta": {"support": 16, "precision": 0.75, "recall": 0.9375, "f1": 0.833333}, "vestido": {"support": 16, "precision": 0.470588, "recall": 0.5, "f1": 0.484848}}, "confusionMatrix": {"calca": {"calca": 14, "camisa": 0, "camiseta": 0, "generic": 0, "jaqueta": 2, "vestido": 1}, "camisa": {"calca": 1, "camisa": 7, "camiseta": 4, "generic": 5, "jaqueta": 0, "vestido": 1}, "camiseta": {"calca": 0, "camisa": 5, "camiseta": 11, "generic": 0, "jaqueta": 0, "vestido": 0}, "generic": {"calca": 3, "camisa": 2, "camiseta": 4, "generic": 0, "jaqueta": 2, "vestido": 7}, "jaqueta": {"calca": 1, "camisa": 0, "camiseta": 0, "generic": 0, "jaqueta": 15, "vestido": 0}, "vestido": {"calca": 2, "camisa": 4, "camiseta": 1, "generic": 0, "jaqueta": 1, "vestido": 8}}}, "dataset": {"train": 466, "validation": 97, "test": 101, "synthetic": true}, "calibrator": {"a": 1.647827, "b": -1.047232, "method": "platt_1d"}, "warning": "Indicadores sintéticos validam a esteira; não estimam desempenho real do PI5.", "metricsHash": "67b9f5b4350fefc1753a8f89541f5613f66752a261d13d436400fc9320380bc7"}, "smoke": {"configuration_id": "pi5-smoke-synthetic-v3", "scenario_id": "S01", "metric_version": "phi-reliability-v1", "success_definition": "P(|erro global| <= 0.10)", "n_total": 101, "n_valid": 101, "n_success": 74, "observed_success": 0.7326732673267327, "wilson_lower_95": 0.6390055396933065, "wilson_upper_95": 0.8092903971305228, "conservative_reliability": 0.6390055396933065, "response_coverage": null, "selective_risk": null, "hallucination_rate": null, "critical_error_rate": null, "ece": 0.049954, "brier_score": 0.200024, "latency_p50_ms": null, "latency_p95_ms": null, "latency_p99_ms": null, "synthetic": true, "additional_metrics": {"global_mae": 0.073076, "global_rmse": 0.092755, "global_r2": 0.846659, "top1_accuracy": 0.544554, "top3_accuracy": 0.871287, "macro_f1": 0.50917, "prediction_interval_target": 0.9, "prediction_interval_coverage": 0.841584, "source_metrics_hash": "67b9f5b4350fefc1753a8f89541f5613f66752a261d13d436400fc9320380bc7", "warning": "Indicadores sintéticos validam a esteira; não estimam desempenho real do PI5."}}, "scenarios": [{"id": "S01", "name": "Baseline controlada", "modality": "multimodal", "quality": "ideal", "evidence": "completa", "risk": "baixo", "target": 30, "status": "smoke_test_executed_partial"}, {"id": "S02", "name": "Variações de linguagem", "modality": "texto", "quality": "aceitável", "evidence": "completa", "risk": "médio", "target": 30, "status": "planned"}, {"id": "S03", "name": "Imagem ideal", "modality": "imagem", "quality": "ideal", "evidence": "completa", "risk": "médio", "target": 30, "status": "planned"}, {"id": "S04", "name": "Degradação progressiva das imagens", "modality": "imagem", "quality": "ruim", "evidence": "parcial", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S05", "name": "Tecidos visualmente semelhantes", "modality": "multimodal", "quality": "aceitável", "evidence": "completa", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S06", "name": "Classes raras ou desconhecidas", "modality": "multimodal", "quality": "variável", "evidence": "parcial", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S07", "name": "Evidências conflitantes", "modality": "multimodal", "quality": "aceitável", "evidence": "conflitante", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S08", "name": "Evidência insuficiente", "modality": "multimodal", "quality": "aceitável", "evidence": "ausente", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S09", "name": "Planejamento operacional", "modality": "texto_documento", "quality": "aceitável", "evidence": "completa", "risk": "médio", "target": 100, "status": "planned"}, {"id": "S10", "name": "Cálculos e unidades", "modality": "texto_documento", "quality": "aceitável", "evidence": "completa", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S11", "name": "Contexto longo", "modality": "multimodal", "quality": "aceitável", "evidence": "completa", "risk": "alto", "target": 100, "status": "planned"}, {"id": "S12", "name": "Robustez adversarial", "modality": "multimodal", "quality": "variável", "evidence": "conflitante", "risk": "crítico", "target": 100, "status": "planned"}, {"id": "S13", "name": "Repetibilidade", "modality": "todas", "quality": "variável", "evidence": "variável", "risk": "médio", "target": 30, "status": "planned"}, {"id": "S14", "name": "Quantização e infraestrutura", "modality": "todas", "quality": "variável", "evidence": "completa", "risk": "alto", "target": 100, "status": "blocked_until_configuration_registry"}, {"id": "S15", "name": "Falhas de ferramentas e recuperação", "modality": "todas", "quality": "inutilizável", "evidence": "ausente", "risk": "crítico", "target": 100, "status": "planned"}], "registry": {"registry_version": "1.0.0", "generated_at": "2026-07-18T00:00:00-03:00", "policy": {"aggregation_rule": "Resultados somente podem ser agregados quando configuration_id, prompt_version e dataset_version forem compatíveis.", "missing_fields_rule": "Configurações incompletas são bloqueadas para avaliação confirmatória."}, "configurations": [{"configuration_id": "pi5-smoke-synthetic-v3", "official_model_name": "PI5 Synthetic Linear Baseline v3", "model_family": "synthetic_linear_baseline", "repository_or_catalog": "private-local-package", "checkpoint_version_or_hash": "da8e7112ec28e9421bc4ba698cf6ff342bea25a60ab6cfcd8570e475df7dcaeb", "obtained_at": "2026-07-18", "runtime": "Node.js 22", "libraries": {"runtime": "node", "external_dependencies": []}, "quantization": "not_applicable", "hardware": {"environment": "isolated_test_environment", "details": "not benchmarked"}, "memory_available": null, "context_window": null, "chat_template": null, "system_prompt_hash": null, "generation": {"deterministic": true, "temperature": 0, "seed": "pi5-synthetic-v3"}, "tools": [], "rag_version": null, "knowledge_graph_version": null, "prompt_version": "not_applicable", "validators_version": "pi5-agent-execution-v3", "postprocessors_version": "pi5-agent-execution-v3", "execution_condition": "synthetic infrastructure smoke test", "dataset_version": "pi5-synthetic-v3", "completeness_status": "complete_for_smoke_test", "promotion_scope": "infrastructure_validation_only"}, {"configuration_id": "phi5-candidate-001", "official_model_name": "UNRESOLVED", "model_family": "Phi-5 candidate", "repository_or_catalog": "UNRESOLVED", "checkpoint_version_or_hash": "UNRESOLVED", "obtained_at": null, "runtime": "UNRESOLVED", "libraries": {}, "quantization": "UNRESOLVED", "hardware": {}, "memory_available": null, "context_window": null, "chat_template": null, "system_prompt_hash": null, "generation": {}, "tools": [], "rag_version": "UNRESOLVED", "knowledge_graph_version": "UNRESOLVED", "prompt_version": "UNRESOLVED", "validators_version": "UNRESOLVED", "postprocessors_version": "UNRESOLVED", "execution_condition": "UNRESOLVED", "dataset_version": null, "completeness_status": "blocked_incomplete_registry", "promotion_scope": "none", "blocking_fields": ["official_model_name", "repository_or_catalog", "checkpoint_version_or_hash", "runtime", "quantization", "hardware", "context_window", "chat_template", "system_prompt_hash", "generation", "rag_version", "knowledge_graph_version", "prompt_version"]}]}, "promotion": {"decision": "experimental", "production_assisted": false, "shadow_mode": true, "reason": "Somente infraestrutura sintética foi validada."}};
+const tabs=document.querySelectorAll("nav button");
+tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.remove("active"));document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.page).classList.add("active")});
+function statusBadge(s){if(s==="smoke_test_executed_partial")return '<span class="badge good">parcial executado</span>';if(s.includes("blocked"))return '<span class="badge bad">bloqueado</span>';return '<span class="badge warn">planejado</span>'}
+function renderScenarios(){
+const risk=document.getElementById("riskFilter").value,status=document.getElementById("statusFilter").value;
+const rows=DATA.scenarios.filter(x=>(!risk||x.risk===risk)&&(!status||x.status===status));
+document.getElementById("scenarioRows").innerHTML=rows.map(x=>`<div class="scenario"><strong>${x.id}</strong><div><strong>${x.name}</strong><div class="muted">${x.modality} • evidência ${x.evidence}</div></div><span class="hide-sm">${x.risk}</span><span class="mobile-hide">${x.target} casos</span><span class="mobile-hide">${statusBadge(x.status)}</span></div>`).join("")||"<p>Nenhum cenário encontrado.</p>";
+}
+document.getElementById("riskFilter").onchange=renderScenarios;document.getElementById("statusFilter").onchange=renderScenarios;renderScenarios();
+function wilson(k,n){const z=1.959963984540054,p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return [Math.max(0,c-h),Math.min(1,c+h)]}
+function calc(){const k=Number(document.getElementById("wins").value),n=Number(document.getElementById("total").value);const el=document.getElementById("wilsonResult");if(!Number.isFinite(k)||!Number.isFinite(n)||n<=0||k<0||k>n){el.innerHTML="Valores inválidos.";return}const [l,u]=wilson(k,n);el.innerHTML=`Taxa observada: <strong>${(k/n*100).toFixed(1)}%</strong><br>IC 95%: <strong>${(l*100).toFixed(1)}%–${(u*100).toFixed(1)}%</strong><br>Confiabilidade conservadora: <strong>${(l*100).toFixed(1)}%</strong>`}
+document.getElementById("calcWilson").onclick=calc;calc();
+</script>
+</body>
+</html>

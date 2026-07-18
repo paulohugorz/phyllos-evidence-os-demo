@@ -1,0 +1,2 @@
+configuration_id,scenario_id,task_family,n_valid,n_success,observed_success,wilson_lower_95,wilson_upper_95,response_coverage,selective_risk,critical_error_rate,hallucination_run_rate,brier_score,expected_calibration_error,latency_p50_ms,latency_p95_ms,latency_p99_ms
+"pi5-smoke-synthetic-v3","S01","pi5_score_and_category",101,74,0.7326732673267327,0.6390055396933065,0.8092903971305228,1,0.26732673267326734,,,0.22261448997925604,0.16337520466027322,,,

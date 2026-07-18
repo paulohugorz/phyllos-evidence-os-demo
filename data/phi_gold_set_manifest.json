@@ -1,0 +1,33 @@
+{
+  "manifest_version": "1.0.0",
+  "dataset_status": "empty_waiting_for_validated_physical_cases",
+  "generated_at": "2026-07-18T00:00:00-03:00",
+  "policy": {
+    "no_synthetic_gold": true,
+    "blind_test_frozen_before_confirmatory_evaluation": true,
+    "human_disagreement_handling": "ambiguity_or_adjudication"
+  },
+  "case_schema": {
+    "case_id": "string",
+    "case_version": "integer",
+    "task_type": "string",
+    "scenario_id": "S01-S15",
+    "input_reference": "secure URI or hash",
+    "evidence_references": [
+      "secure URI or hash"
+    ],
+    "reference_answer": "object",
+    "correction_criteria": "object",
+    "risk_level": "low|medium|high|critical",
+    "possible_error_classes": [
+      "taxonomy code"
+    ],
+    "indetermination_allowed": "boolean",
+    "human_review": "object",
+    "origin": "string",
+    "license": "string",
+    "split": "development|calibration|internal_test|blind_test|stress_test|post_deployment",
+    "payload_hash": "sha256"
+  },
+  "cases": []
+}
