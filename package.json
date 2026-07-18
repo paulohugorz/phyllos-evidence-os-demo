@@ -10,9 +10,15 @@
     "test": "node --test",
     "demo": "node src/demo.js",
     "start": "node src/server.js",
-    "test:training-data": "node --test tests/pi5-training-data.test.js",
+    "test:training-data": "node --test tests/pi5-training-data.test.js tests/pi5-training-operations.test.js tests/pi5-sampling-plan.test.js",
     "dataset:validate": "node scripts/validate-pi5-training-data.mjs",
-    "dataset:build": "node scripts/build-pi5-dataset.mjs"
+    "dataset:build": "node scripts/build-pi5-dataset.mjs",
+    "training:migrate": "node scripts/migrate-pi5-training.mjs",
+    "training:seed": "node scripts/seed-pi5-training-reference.mjs",
+    "training:serve": "node src/pi5-training-server.js",
+    "training:export": "node scripts/export-pi5-eligible.mjs",
+    "dataset:audit": "node scripts/audit-pi5-dataset.mjs data/pi5/datasets/latest",
+    "sampling:plan": "node scripts/plan-pi5-sampling.mjs"
   },
   "dependencies": {
     "pg": "^8.22.0"

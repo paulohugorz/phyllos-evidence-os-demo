@@ -12,6 +12,8 @@ services:
       - ./migrations/001_pi5_events.sql:/docker-entrypoint-initdb.d/001_pi5_events.sql:ro
       - ./migrations/002_pi5_training_foundation.sql:/docker-entrypoint-initdb.d/002_pi5_training_foundation.sql:ro
       - ./migrations/003_pi5_training_views.sql:/docker-entrypoint-initdb.d/003_pi5_training_views.sql:ro
+      - ./migrations/004_pi5_training_operations.sql:/docker-entrypoint-initdb.d/004_pi5_training_operations.sql:ro
+      - ./migrations/005_pi5_training_operational_views.sql:/docker-entrypoint-initdb.d/005_pi5_training_operational_views.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U phyllos -d phyllos_pi5"]
       interval: 5s

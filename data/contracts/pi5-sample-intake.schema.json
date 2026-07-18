@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-sample-intake.schema.json",
+  "title": "PI5 Sample Intake",
+  "type": "object",
+  "required": ["productId", "canonicalKey", "lineageGroupKey"],
+  "properties": {
+    "productId": { "type": "string", "minLength": 1 },
+    "batchId": { "type": ["string", "null"] },
+    "canonicalKey": { "type": "string", "minLength": 1 },
+    "lineageGroupKey": { "type": "string", "minLength": 1 },
+    "sampleKind": { "enum": ["physical_piece", "fabric_swatch", "component", "document_only", "synthetic_fixture"] },
+    "synthetic": { "type": "boolean" },
+    "storageLocation": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

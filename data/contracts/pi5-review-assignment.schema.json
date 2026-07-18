@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-review-assignment.schema.json",
+  "title": "PI5 Blind Review Assignment",
+  "type": "object",
+  "required": ["labelingSessionId", "expertActorId", "assignedBy"],
+  "properties": {
+    "labelingSessionId": { "type": "string" },
+    "expertActorId": { "type": "string" },
+    "assignedBy": { "type": "string" },
+    "dueAt": { "type": ["string", "null"], "format": "date-time" },
+    "independenceStatus": { "enum": ["verified", "warning", "blocked"] },
+    "independenceReasons": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

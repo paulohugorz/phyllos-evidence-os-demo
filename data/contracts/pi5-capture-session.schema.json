@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-capture-session.schema.json",
+  "title": "PI5 Capture Session",
+  "type": "object",
+  "required": ["sampleId", "protocolId", "sessionKey", "operatorActorId", "startedAt", "protocolSnapshot", "protocolHash"],
+  "properties": {
+    "sampleId": { "type": "string" },
+    "protocolId": { "type": "string" },
+    "sessionKey": { "type": "string" },
+    "operatorActorId": { "type": "string" },
+    "deviceActorId": { "type": ["string", "null"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": ["string", "null"], "format": "date-time" },
+    "protocolSnapshot": { "type": "object" },
+    "protocolHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "environment": { "type": "object" }
+  },
+  "additionalProperties": false
+}

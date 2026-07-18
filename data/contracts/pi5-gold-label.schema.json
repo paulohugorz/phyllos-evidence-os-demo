@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phyllos.local/contracts/pi5-gold-label.schema.json",
+  "title": "PI5 Frozen Gold Label",
+  "type": "object",
+  "required": ["labelingSessionId", "sampleId", "predictionId", "labelTier", "categoryLabel", "globalScore", "dimensionScores", "reviewerActorIds", "protocolVersion", "protocolHash", "labelHash"],
+  "properties": {
+    "labelingSessionId": { "type": "string" },
+    "sampleId": { "type": "string" },
+    "predictionId": { "type": "string" },
+    "labelTier": { "enum": ["gold", "silver"] },
+    "categoryLabel": { "type": "string" },
+    "globalScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "dimensionScores": { "type": "object" },
+    "reviewerActorIds": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "type": "string" } },
+    "protocolVersion": { "type": "string" },
+    "protocolHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "labelHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "additionalProperties": true
+}
