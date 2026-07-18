@@ -1,0 +1,309 @@
+{
+  "global": {
+    "count": 95,
+    "mae": 0.070178,
+    "rmse": 0.087446,
+    "r2": 0.874035,
+    "pearson": 0.935824,
+    "medianAbsoluteError": 0.0568,
+    "p90AbsoluteError": 0.1436,
+    "bias": 0.008816
+  },
+  "dimensions": {
+    "climate": {
+      "count": 95,
+      "mae": 0.109492,
+      "rmse": 0.131353,
+      "r2": 0.923367,
+      "pearson": 0.961615,
+      "medianAbsoluteError": 0.1004,
+      "p90AbsoluteError": 0.20164,
+      "bias": -0.012759
+    },
+    "water": {
+      "count": 95,
+      "mae": 0.119406,
+      "rmse": 0.145718,
+      "r2": 0.94588,
+      "pearson": 0.973035,
+      "medianAbsoluteError": 0.1046,
+      "p90AbsoluteError": 0.24148,
+      "bias": -0.018131
+    },
+    "chemicals": {
+      "count": 95,
+      "mae": 0.129096,
+      "rmse": 0.158493,
+      "r2": 0.920925,
+      "pearson": 0.959984,
+      "medianAbsoluteError": 0.1189,
+      "p90AbsoluteError": 0.23916,
+      "bias": -0.008906
+    },
+    "materials": {
+      "count": 95,
+      "mae": 0.121581,
+      "rmse": 0.15214,
+      "r2": 0.867386,
+      "pearson": 0.931447,
+      "medianAbsoluteError": 0.1213,
+      "p90AbsoluteError": 0.23328,
+      "bias": -0.005954
+    },
+    "wasteCircularity": {
+      "count": 95,
+      "mae": 0.116154,
+      "rmse": 0.146461,
+      "r2": 0.87578,
+      "pearson": 0.936486,
+      "medianAbsoluteError": 0.1016,
+      "p90AbsoluteError": 0.24834,
+      "bias": -0.005524
+    },
+    "durability": {
+      "count": 95,
+      "mae": 0.112884,
+      "rmse": 0.14209,
+      "r2": 0.96875,
+      "pearson": 0.985634,
+      "medianAbsoluteError": 0.0882,
+      "p90AbsoluteError": 0.24206,
+      "bias": 0.016333
+    }
+  },
+  "thresholdPerformance": {
+    "0.10": 0.726316,
+    "0.25": 1,
+    "0.50": 1
+  },
+  "confidence": {
+    "definition": "P(|erro global| <= 0.1)",
+    "brierScore": 0.193151,
+    "expectedCalibrationError": 0.04244,
+    "bins": [
+      {
+        "lower": 0.5,
+        "upper": 0.6,
+        "count": 3,
+        "confidence": 0.578576,
+        "accuracy": 0.333333,
+        "gap": 0.245243
+      },
+      {
+        "lower": 0.6,
+        "upper": 0.7,
+        "count": 30,
+        "confidence": 0.659375,
+        "accuracy": 0.633333,
+        "gap": 0.026042
+      },
+      {
+        "lower": 0.7,
+        "upper": 0.8,
+        "count": 55,
+        "confidence": 0.740787,
+        "accuracy": 0.781818,
+        "gap": 0.041031
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 7,
+        "confidence": 0.820271,
+        "accuracy": 0.857143,
+        "gap": 0.036872
+      }
+    ],
+    "meanDeclaredConfidence": 0.715812,
+    "observedAccuracyAtTolerance": 0.726316
+  },
+  "predictionInterval": {
+    "quantile": 0.9,
+    "radius": 0.159,
+    "empiricalCoverage": 0.915789,
+    "meanWidth": 0.318
+  },
+  "bootstrap95": {
+    "mae": {
+      "lower": 0.05976,
+      "upper": 0.080295,
+      "iterations": 500,
+      "confidenceLevel": 0.95
+    },
+    "rmse": {
+      "lower": 0.076417,
+      "upper": 0.098582,
+      "iterations": 500,
+      "confidenceLevel": 0.95
+    }
+  },
+  "evaluationHash": "d453d840cd3815a72aa4532066c2a3953b3d34c69acd13137b2d6fedc6c0ce08",
+  "byCategory": {
+    "calca": {
+      "count": 17,
+      "mae": 0.065306,
+      "rmse": 0.080336,
+      "r2": 0.821102,
+      "pearson": 0.9413,
+      "medianAbsoluteError": 0.0732,
+      "p90AbsoluteError": 0.11704,
+      "bias": -0.022894
+    },
+    "camisa": {
+      "count": 15,
+      "mae": 0.068727,
+      "rmse": 0.085075,
+      "r2": 0.763701,
+      "pearson": 0.898366,
+      "medianAbsoluteError": 0.0568,
+      "p90AbsoluteError": 0.14756,
+      "bias": 0.035113
+    },
+    "camiseta": {
+      "count": 16,
+      "mae": 0.066206,
+      "rmse": 0.081821,
+      "r2": 0.719346,
+      "pearson": 0.884384,
+      "medianAbsoluteError": 0.0498,
+      "p90AbsoluteError": 0.12325,
+      "bias": 0.014544
+    },
+    "generic": {
+      "count": 16,
+      "mae": 0.069487,
+      "rmse": 0.08759,
+      "r2": 0.748063,
+      "pearson": 0.890792,
+      "medianAbsoluteError": 0.0546,
+      "p90AbsoluteError": 0.1413,
+      "bias": 0.027987
+    },
+    "jaqueta": {
+      "count": 15,
+      "mae": 0.05304,
+      "rmse": 0.074533,
+      "r2": 0.926371,
+      "pearson": 0.967349,
+      "medianAbsoluteError": 0.0351,
+      "p90AbsoluteError": 0.12864,
+      "bias": -0.02528
+    },
+    "vestido": {
+      "count": 16,
+      "mae": 0.097444,
+      "rmse": 0.110388,
+      "r2": 0.832609,
+      "pearson": 0.936083,
+      "medianAbsoluteError": 0.098,
+      "p90AbsoluteError": 0.1539,
+      "bias": 0.024919
+    }
+  },
+  "categoryIdentification": {
+    "accuracy": 0.557895,
+    "top3Accuracy": 0.873684,
+    "macroF1": 0.542279,
+    "perCategory": {
+      "calca": {
+        "support": 17,
+        "precision": 0.631579,
+        "recall": 0.705882,
+        "f1": 0.666667
+      },
+      "camisa": {
+        "support": 15,
+        "precision": 0.375,
+        "recall": 0.4,
+        "f1": 0.387097
+      },
+      "camiseta": {
+        "support": 16,
+        "precision": 0.631579,
+        "recall": 0.75,
+        "f1": 0.685714
+      },
+      "generic": {
+        "support": 16,
+        "precision": 0.333333,
+        "recall": 0.1875,
+        "f1": 0.24
+      },
+      "jaqueta": {
+        "support": 15,
+        "precision": 0.75,
+        "recall": 0.8,
+        "f1": 0.774194
+      },
+      "vestido": {
+        "support": 16,
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1": 0.5
+      }
+    },
+    "confusionMatrix": {
+      "calca": {
+        "calca": 12,
+        "camisa": 0,
+        "camiseta": 0,
+        "generic": 1,
+        "jaqueta": 3,
+        "vestido": 1
+      },
+      "camisa": {
+        "calca": 0,
+        "camisa": 6,
+        "camiseta": 5,
+        "generic": 2,
+        "jaqueta": 1,
+        "vestido": 1
+      },
+      "camiseta": {
+        "calca": 0,
+        "camisa": 3,
+        "camiseta": 12,
+        "generic": 0,
+        "jaqueta": 0,
+        "vestido": 1
+      },
+      "generic": {
+        "calca": 4,
+        "camisa": 3,
+        "camiseta": 1,
+        "generic": 3,
+        "jaqueta": 0,
+        "vestido": 5
+      },
+      "jaqueta": {
+        "calca": 1,
+        "camisa": 2,
+        "camiseta": 0,
+        "generic": 0,
+        "jaqueta": 12,
+        "vestido": 0
+      },
+      "vestido": {
+        "calca": 2,
+        "camisa": 2,
+        "camiseta": 1,
+        "generic": 3,
+        "jaqueta": 0,
+        "vestido": 8
+      }
+    }
+  },
+  "dataset": {
+    "train": 472,
+    "validation": 97,
+    "test": 95,
+    "synthetic": true
+  },
+  "calibrator": {
+    "a": 2.0168,
+    "b": -1.722327,
+    "method": "platt_1d"
+  },
+  "warning": "Indicadores sintéticos validam a esteira; não estimam desempenho real do PI5.",
+  "metricsHash": "711585936cbf8834d9fe47d15960326362ee102860b6e6e8f3d55a30186cdaa6"
+}

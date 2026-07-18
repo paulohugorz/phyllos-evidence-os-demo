@@ -1,0 +1,605 @@
+{
+  "regressionModel": {
+    "type": "multi_output_ridge",
+    "outputs": {
+      "globalScore": {
+        "coefficients": [
+          2.6713347457627146,
+          0.0947272233049611,
+          0.09272283681215654,
+          0.06661966438702263,
+          -0.09897664201276857,
+          -0.09453206020184717,
+          -0.017328537072802786,
+          0.10365619050563489,
+          -0.02526328362008669,
+          0.06222975556765364,
+          0.008155686476942618,
+          0.05459380330505873,
+          0.005820806031574747
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "climate": {
+        "coefficients": [
+          2.393747881355932,
+          0.4425384785291194,
+          -0.007008702834317545,
+          -0.005022318192955575,
+          0.005840277348681399,
+          -0.0017270624690331156,
+          0.012668506747496009,
+          -0.000950559835700897,
+          -0.11623729484792357,
+          -0.00827106641939191,
+          0.0037439872144224232,
+          0.15654652105442562,
+          0.00020946810517549216
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "water": {
+        "coefficients": [
+          3.3278877118644035,
+          0.0013404558815975922,
+          0.010772093224917637,
+          -0.005897226388847378,
+          -0.624708776653495,
+          -0.002070179484464096,
+          -0.002982463278837526,
+          0.00005269789882620987,
+          0.0009478883444073174,
+          0.007555976889363097,
+          0.08043012107356473,
+          0.00467503755087946,
+          -0.0034585072857548486
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "chemicals": {
+        "coefficients": [
+          3.259245762711864,
+          -0.008042829196640632,
+          -0.0044007533723563926,
+          0.11795392512213188,
+          -0.0033709354245662496,
+          -0.5944936083698261,
+          0.010731544205077301,
+          -0.008347100500357113,
+          0.008962687494043997,
+          -0.0007431162885635786,
+          -0.0006189889764244263,
+          -0.004644024555395339,
+          -0.019849797767379534
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "materials": {
+        "coefficients": [
+          2.360078389830508,
+          -0.003183178545390796,
+          0.3462929320276494,
+          0.2724183280427741,
+          -0.0035483487463304347,
+          0.0003756535950155404,
+          -0.007047035158407825,
+          -0.003112795188134484,
+          0.00015929002071219615,
+          -0.0019219265726219334,
+          -0.009151098882508785,
+          0.007146307297203478,
+          0.0640631905178311
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "wasteCircularity": {
+        "coefficients": [
+          2.016970338983049,
+          0.004512655054528706,
+          0.21944990289279814,
+          -0.0030314603522397505,
+          -0.005543832914934371,
+          0.0059614977920864265,
+          -0.15573332911967402,
+          -0.005980721867213439,
+          0.003097357189318947,
+          0.2444927895093011,
+          -0.011273475393413012,
+          0.16155866268262586,
+          0.008858172034060616
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      },
+      "durability": {
+        "coefficients": [
+          2.6530423728813557,
+          0.013260877549812434,
+          0.0042762627191495406,
+          -0.007443737312950543,
+          0.006468181328775,
+          0.00355264459410652,
+          -0.004776824435423557,
+          0.6645883978257199,
+          -0.010723846451456234,
+          0.16889707923408337,
+          0.0031852854578885577,
+          0.005065219519744492,
+          0.0044347458755449294
+        ],
+        "scaler": {
+          "featureNames": [
+            "renewableEnergyShare",
+            "recycledContentShare",
+            "certifiedMaterialShare",
+            "waterIntensity",
+            "chemicalRisk",
+            "wasteRate",
+            "durabilityCycles",
+            "transportDistanceKm",
+            "repairability",
+            "traceabilityCoverage",
+            "processEfficiency",
+            "supplierEvidenceQuality"
+          ],
+          "means": {
+            "renewableEnergyShare": 0.4713406779661017,
+            "recycledContentShare": 0.3031031779661016,
+            "certifiedMaterialShare": 0.40283728813559333,
+            "waterIntensity": 0.5404040254237287,
+            "chemicalRisk": 0.46239152542372847,
+            "wasteRate": 0.2255194915254239,
+            "durabilityCycles": 74.01679237288138,
+            "transportDistanceKm": 3301.6066099576256,
+            "repairability": 0.4879811440677962,
+            "traceabilityCoverage": 0.6323016949152542,
+            "processEfficiency": 0.6005451271186436,
+            "supplierEvidenceQuality": 0.7235832627118638
+          },
+          "stddevs": {
+            "renewableEnergyShare": 0.22252673986618443,
+            "recycledContentShare": 0.17833831984362272,
+            "certifiedMaterialShare": 0.20618141100785037,
+            "waterIntensity": 0.19433569223425953,
+            "chemicalRisk": 0.16646276920043254,
+            "wasteRate": 0.08578430653213377,
+            "durabilityCycles": 31.132015185277364,
+            "transportDistanceKm": 1814.9058100475818,
+            "repairability": 0.21898411947192536,
+            "traceabilityCoverage": 0.1519684077243681,
+            "processEfficiency": 0.18058660317820216,
+            "supplierEvidenceQuality": 0.11546816420312338
+          }
+        },
+        "lambda": 0.7
+      }
+    },
+    "featureNames": [
+      "renewableEnergyShare",
+      "recycledContentShare",
+      "certifiedMaterialShare",
+      "waterIntensity",
+      "chemicalRisk",
+      "wasteRate",
+      "durabilityCycles",
+      "transportDistanceKm",
+      "repairability",
+      "traceabilityCoverage",
+      "processEfficiency",
+      "supplierEvidenceQuality"
+    ],
+    "trainedRecords": 472
+  },
+  "categoryModel": {
+    "type": "nearest_centroid",
+    "scaler": {
+      "featureNames": [
+        "renewableEnergyShare",
+        "recycledContentShare",
+        "certifiedMaterialShare",
+        "waterIntensity",
+        "chemicalRisk",
+        "wasteRate",
+        "durabilityCycles",
+        "transportDistanceKm",
+        "repairability",
+        "traceabilityCoverage",
+        "processEfficiency",
+        "supplierEvidenceQuality"
+      ],
+      "means": {
+        "renewableEnergyShare": 0.4713406779661017,
+        "recycledContentShare": 0.3031031779661016,
+        "certifiedMaterialShare": 0.40283728813559333,
+        "waterIntensity": 0.5404040254237287,
+        "chemicalRisk": 0.46239152542372847,
+        "wasteRate": 0.2255194915254239,
+        "durabilityCycles": 74.01679237288138,
+        "transportDistanceKm": 3301.6066099576256,
+        "repairability": 0.4879811440677962,
+        "traceabilityCoverage": 0.6323016949152542,
+        "processEfficiency": 0.6005451271186436,
+        "supplierEvidenceQuality": 0.7235832627118638
+      },
+      "stddevs": {
+        "renewableEnergyShare": 0.22252673986618443,
+        "recycledContentShare": 0.17833831984362272,
+        "certifiedMaterialShare": 0.20618141100785037,
+        "waterIntensity": 0.19433569223425953,
+        "chemicalRisk": 0.16646276920043254,
+        "wasteRate": 0.08578430653213377,
+        "durabilityCycles": 31.132015185277364,
+        "transportDistanceKm": 1814.9058100475818,
+        "repairability": 0.21898411947192536,
+        "traceabilityCoverage": 0.1519684077243681,
+        "processEfficiency": 0.18058660317820216,
+        "supplierEvidenceQuality": 0.11546816420312338
+      }
+    },
+    "centroids": {
+      "camiseta": [
+        -0.24505109628010077,
+        0.3956432950434122,
+        0.01630326321220414,
+        0.3261727142787949,
+        -0.2587888277830957,
+        -0.5760303407218854,
+        -0.908834890233224,
+        -0.06582134247372903,
+        -0.10617379421436886,
+        0.1841870504284107,
+        -0.004019657807597852,
+        0.013779523329878427
+      ],
+      "jaqueta": [
+        0.009515934504199198,
+        0.004297687046367984,
+        -0.3047117362492874,
+        -0.8683602614228714,
+        0.8783329816111,
+        -0.015322478987369091,
+        1.489951165531968,
+        -0.08326635332919902,
+        0.7678546291929249,
+        -0.07311095668581076,
+        0.1583962457156217,
+        -0.04215943738295267
+      ],
+      "generic": [
+        0.11449442907049934,
+        0.00748197042042574,
+        -0.03810861559820327,
+        -0.26293561844590807,
+        -0.1866575064981421,
+        0.0037362133883550113,
+        -0.20553094089159196,
+        -0.01786197031722303,
+        -0.19486524488944482,
+        -0.10676853931827099,
+        0.03104395776149732,
+        0.22558587873896077
+      ],
+      "camisa": [
+        0.018028494176973095,
+        -0.12332278326602197,
+        0.4410264796419715,
+        -0.14051857952480934,
+        -0.5488481049700755,
+        -0.21907551958101062,
+        -0.4747020000128438,
+        0.02922516887583488,
+        -0.12567072961345188,
+        0.03609010034962897,
+        -0.0619169801184525,
+        -0.2320943863342281
+      ],
+      "calca": [
+        0.049535432928929306,
+        -0.27512603949315384,
+        -0.03597079328616936,
+        0.734275690356768,
+        0.2768570826711553,
+        0.14512374286949445,
+        0.6824304008174761,
+        0.13497883642321706,
+        -0.1268518773515908,
+        0.11484525501475443,
+        -0.02969218170760715,
+        0.08656895289140319
+      ],
+      "vestido": [
+        0.05059185241911263,
+        -0.00958620796703089,
+        -0.0854244282990368,
+        0.24225764895958235,
+        -0.14974773626174395,
+        0.6691469065483301,
+        -0.5762246952490413,
+        0.005252312008735052,
+        -0.21754470822070723,
+        -0.15102094710104735,
+        -0.09543115798074517,
+        -0.049863282455018226
+      ]
+    },
+    "categories": [
+      "calca",
+      "camisa",
+      "camiseta",
+      "generic",
+      "jaqueta",
+      "vestido"
+    ]
+  },
+  "calibrator": {
+    "a": 2.0168,
+    "b": -1.722327,
+    "method": "platt_1d"
+  },
+  "validationResidualScale": 0.09193751295668053,
+  "synthetic": true,
+  "artifactHash": "0f8a0953fcf0117f7902734beb9bc2239a2281ce27448b165e18d8e9a03e39e8"
+}

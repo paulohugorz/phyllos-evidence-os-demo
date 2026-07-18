@@ -1,0 +1,18 @@
+{
+  "type": "synthetic_fixture_generation",
+  "synthetic": true,
+  "empiricalPerformanceClaimAllowed": false,
+  "count": 720,
+  "categories": [
+    "camiseta",
+    "camisa",
+    "calca",
+    "vestido",
+    "jaqueta",
+    "generic"
+  ],
+  "seed": "pi5-synthetic-v3",
+  "invalidRate": 0.08,
+  "contentHash": "af3830f83a04284b9f9e7a7a18a69000ab757540b30aa891d779eb548dfbfcf7",
+  "generatedAt": "2026-07-18T13:28:49.913Z"
+}

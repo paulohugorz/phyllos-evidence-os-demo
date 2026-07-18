@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "checks": {
+    "synthetic": true,
+    "empiricalPerformanceClaimAllowed": false,
+    "records": 664,
+    "invalidRecords": 0,
+    "leakageIssues": 0,
+    "splitCounts": {
+      "train": 472,
+      "validation": 97,
+      "test": 95
+    },
+    "lineageCounts": {
+      "train": 252,
+      "validation": 53,
+      "test": 53
+    },
+    "categoryCounts": {
+      "camiseta": 111,
+      "jaqueta": 108,
+      "generic": 113,
+      "camisa": 112,
+      "calca": 110,
+      "vestido": 110
+    },
+    "manifestContentHash": "ad6a73c07e07cafd789b925cad53b74fd552215ec4536d2edc365395a6c3ebe8",
+    "reportHash": "df86e76780fb866bc14371ec9378c7f628978dfdc09fd5e55b7a59f2ff57064b"
+  },
+  "invalid": [],
+  "leakage": [],
+  "auditedAt": "2026-07-18T13:28:50.315Z"
+}

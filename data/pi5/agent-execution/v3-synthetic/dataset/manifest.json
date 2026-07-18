@@ -1,0 +1,44 @@
+{
+  "datasetName": "phyllos-pi5-synthetic-validation",
+  "version": "3.0.0-synthetic",
+  "createdAt": "2026-07-18T13:28:50.135Z",
+  "protocolVersion": "pi5-synthetic-labeling-v3",
+  "recordCount": 664,
+  "splitCounts": {
+    "train": 472,
+    "validation": 97,
+    "test": 95
+  },
+  "contentHash": "ad6a73c07e07cafd789b925cad53b74fd552215ec4536d2edc365395a6c3ebe8",
+  "qualitySummary": {
+    "quarantined": 56,
+    "leakageIssues": 0,
+    "meanEvidenceQuality": 89.08,
+    "categories": {
+      "calca": 110,
+      "camisa": 112,
+      "camiseta": 111,
+      "generic": 113,
+      "jaqueta": 108,
+      "vestido": 110
+    }
+  },
+  "files": {},
+  "limitations": [
+    "Dataset pequeno deve ser interpretado por categoria e qualidade de evidência, não apenas por métrica global."
+  ],
+  "recommendedUses": [
+    "Validação da infraestrutura de dados e MLOps",
+    "Teste de splits, quarentena, métricas e relatórios",
+    "Ensaio de integração com o PostgreSQL privado"
+  ],
+  "prohibitedUses": [
+    "Claims de desempenho empírico do PI5",
+    "Mistura com o conjunto ouro físico",
+    "Certificação ou decisão ambiental sobre produtos reais"
+  ],
+  "synthetic": true,
+  "empiricalPerformanceClaimAllowed": false,
+  "splitSaltHash": "55f2de0733dad400b6694175e1d43eb4423465d75e8293d634d868d4af401a44",
+  "sourceHash": "af3830f83a04284b9f9e7a7a18a69000ab757540b30aa891d779eb548dfbfcf7"
+}

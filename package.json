@@ -18,7 +18,14 @@
     "training:serve": "node src/pi5-training-server.js",
     "training:export": "node scripts/export-pi5-eligible.mjs",
     "dataset:audit": "node scripts/audit-pi5-dataset.mjs data/pi5/datasets/latest",
-    "sampling:plan": "node scripts/plan-pi5-sampling.mjs"
+    "sampling:plan": "node scripts/plan-pi5-sampling.mjs",
+    "agents:execute": "node scripts/execute-pi5-agents.mjs",
+    "agents:synthetic:generate": "node scripts/generate-pi5-synthetic.mjs",
+    "agents:dataset:build": "node scripts/build-pi5-agent-dataset.mjs",
+    "agents:model:evaluate": "node scripts/evaluate-pi5-agent-model.mjs",
+    "agents:report": "node scripts/report-pi5-agent-execution.mjs",
+    "agents:register:postgres": "node scripts/register-pi5-agent-run-postgres.mjs",
+    "test:agent-execution": "node --test tests/pi5-synthetic-fixtures.test.js tests/pi5-evaluation.test.js"
   },
   "dependencies": {
     "pg": "^8.22.0"
