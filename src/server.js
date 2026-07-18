@@ -93,6 +93,8 @@ const productionAssetsVersion = "20260717-2";
 const pi5AssetsVersion = "20260718-pi5-1";
 const accessibilityAssetsVersion = "20260717-visual-2";
 
+const onboardingAssetsVersion = "20260718-onboarding-1";
+
 function enhanceIndexHtml(html) {
   let next = html;
   if (!next.includes("production-cards.css")) {
@@ -123,6 +125,15 @@ function enhanceIndexHtml(html) {
     next = next.replace("</body>", `  <script type="module" src="/pi5-mlops-ui.js?v=${pi5AssetsVersion}"></script>
 </body>`);
   }
+  if (!next.includes("onboarding.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/onboarding.css?v=${onboardingAssetsVersion}">
+</head>`);
+  }
+  if (!next.includes("onboarding.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/onboarding.js?v=${onboardingAssetsVersion}"></script>
+</body>`);
+  }
+
   return next;
 }
 
