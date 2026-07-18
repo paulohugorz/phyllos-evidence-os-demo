@@ -1,0 +1,26 @@
+import { useMemo, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { Screen } from '@/src/components/Screen';
+import { Badge, Button, Card, Eyebrow, Field, Subtitle, Title } from '@/src/components/UI';
+import { useApp } from '@/src/context/AppContext';
+import { colors } from '@/src/lib/theme';
+import { PieceStage } from '@/src/lib/types';
+
+const stages: { key: PieceStage; label: string }[] = [{ key: 'planned', label: 'Planejamento' }, { key: 'materials', label: 'Materiais' }, { key: 'cutting', label: 'Corte' }, { key: 'sewing', label: 'Costura' }, { key: 'fitting', label: 'Prova' }, { key: 'quality', label: 'Qualidade' }, { key: 'ready', label: 'Pronta' }, { key: 'delivered', label: 'Entregue' }];
+export default function PieceDetail() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { pieces, updatePiece, removePiece, impacts } = useApp();
+  const piece = pieces.find((item) => item.id === id);
+  const [material, setMaterial] = useState(piece?.material || '');
+  const [waste, setWaste] = useState(String(piece?.wastePct ?? 15));
+  const latest = useMemo(() => piece ? impacts[piece.id]?.[0] : undefined, [impacts, piece]);
+  if (!piece) return <Screen><Title>Peça não encontrada</Title><Button label="Voltar" onPress={() => router.back()} /></Screen>;
+  async function takePhoto() { const permission = await ImagePicker.requestCameraPermissionsAsync(); if (!permission.granted) return Alert.alert('Câmera bloqueada', 'Autorize o acesso à câmera nas configurações do aparelho.'); const result = await ImagePicker.launchCameraAsync({ mediaTypes: 'images', quality: .72 }); if (!result.canceled) await updatePiece(piece.id, { images: [result.assets[0].uri, ...piece.images].slice(0, 6) }); }
+  async function choosePhoto() { const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: .72 }); if (!result.canceled) await updatePiece(piece.id, { images: [result.assets[0].uri, ...piece.images].slice(0, 6) }); }
+  async function saveFields() { await updatePiece(piece.id, { material, wastePct: Math.max(0, Number(waste) || 0) }); Alert.alert('Dados atualizados', 'As informações já poderão ser usadas no próximo cálculo PI5.'); }
+  function confirmDelete() { Alert.alert('Excluir peça?', 'Este registro será removido apenas deste aparelho.', [{ text: 'Cancelar' }, { text: 'Excluir', style: 'destructive', onPress: async () => { await removePiece(piece.id); router.replace('/(tabs)/production'); } }]); }
+  return <Screen><View style={{ gap: 8 }}><Eyebrow>{piece.category}</Eyebrow><Title>{piece.name}</Title><Subtitle>{piece.client || 'Sem cliente vinculado'} · {piece.quantity} peça(s)</Subtitle></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stageRow}>{stages.map((stage) => <Text key={stage.key} onPress={() => updatePiece(piece.id, { stage: stage.key })} style={[styles.stage, piece.stage === stage.key && styles.stageActive]}>{stage.label}</Text>)}</ScrollView><Card><Text style={styles.sectionTitle}>Imagens da produção</Text><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.images}>{piece.images.length ? piece.images.map((uri) => <Image key={uri} source={{ uri }} style={styles.image} />) : <View style={styles.emptyImage}><Text>Sem foto</Text></View>}</ScrollView><View style={styles.two}><Button label="Usar câmera" onPress={takePhoto} /><Button secondary label="Escolher foto" onPress={choosePhoto} /></View></Card><Card><Text style={styles.sectionTitle}>Dados da peça</Text><Field label="Material principal" value={material} onChangeText={setMaterial} /><Field label="Perda no corte (%)" keyboardType="decimal-pad" value={waste} onChangeText={setWaste} /><Button label="Salvar alterações" onPress={saveFields} /></Card><Card><Text style={styles.sectionTitle}>Impacto ambiental</Text>{latest ? <><Badge tone={latest.score >= 3.5 ? 'good' : latest.score >= 2.5 ? 'warn' : 'danger'}>PI5 {latest.score}/5</Badge><Text style={styles.muted}>Último cálculo: {new Date(latest.calculatedAt).toLocaleDateString('pt-BR')} · {latest.source === 'offline' ? 'aguardando sincronização' : latest.modelVersion}</Text></> : <Text style={styles.muted}>Ainda não há cálculo PI5 para esta peça.</Text>}<Button label="Abrir cálculo PI5" onPress={() => router.push('/(tabs)/impact')} /></Card><Button secondary label="Excluir peça deste aparelho" onPress={confirmDelete} /></Screen>;
+}
+const styles = StyleSheet.create({ stageRow: { gap: 8, paddingVertical: 4 }, stage: { borderWidth: 1, borderColor: colors.line, paddingHorizontal: 13, paddingVertical: 10, backgroundColor: colors.white, color: colors.ink }, stageActive: { backgroundColor: colors.ink, color: colors.white }, sectionTitle: { fontSize: 21, fontWeight: '600', color: colors.ink }, images: { gap: 10 }, image: { width: 210, height: 160 }, emptyImage: { width: 210, height: 150, backgroundColor: colors.sand, alignItems: 'center', justifyContent: 'center' }, two: { gap: 10 }, muted: { fontSize: 14, lineHeight: 21, color: colors.muted } });
