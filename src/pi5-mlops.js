@@ -1,5 +1,6 @@
-import { mkdir, readFile, appendFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createPI5Repository } from "./pi5-persistence.js";
 import { randomUUID } from "node:crypto";
 
 const clamp = (value, min = 0, max = 5) => Math.min(max, Math.max(min, Number(value) || 0));
@@ -95,21 +96,17 @@ export function calculatePI5(input = {}, model = DEFAULT_PI5_MODEL) {
 }
 
 export class PI5MLOpsStore {
-  constructor({ dataDir = process.env.PI5_DATA_DIR || join(process.cwd(), ".runtime", "pi5"), modelPath = join(process.cwd(), "models", "pi5", "champion.json") } = {}) {
-    this.dataDir = dataDir;
+  constructor({ repository, dataDir, connectionString, sslMode, modelPath = join(process.cwd(), "models", "pi5", "champion.json") } = {}) {
     this.modelPath = modelPath;
-    this.eventsPath = join(dataDir, "production-events.jsonl");
+    this.repository = createPI5Repository({ repository, dataDir, connectionString, sslMode });
   }
-  async ensure() { await mkdir(this.dataDir, { recursive: true }); }
   async currentModel() {
     try { return { ...DEFAULT_PI5_MODEL, ...JSON.parse(await readFile(this.modelPath, "utf8")) }; }
     catch { return DEFAULT_PI5_MODEL; }
   }
   async append(eventType, payload = {}) {
-    await this.ensure();
-    const event = { id: randomUUID(), eventType, occurredAt: new Date().toISOString(), ...payload };
-    await appendFile(this.eventsPath, `${JSON.stringify(event)}\n`, "utf8");
-    return event;
+    const event = { id: payload.id || randomUUID(), eventType, occurredAt: payload.occurredAt || new Date().toISOString(), ...payload };
+    return this.repository.append(event);
   }
   async predict(input = {}) {
     const model = await this.currentModel();
@@ -125,15 +122,18 @@ export class PI5MLOpsStore {
     return this.append("expert_feedback", { ...input, expertScore: round(expertScore, 2), labelStatus: "validated" });
   }
   async lines() {
-    try { return (await readFile(this.eventsPath, "utf8")).split("\n").filter(Boolean); }
-    catch { return []; }
+    return (await this.repository.list()).map((event) => JSON.stringify(event));
   }
   async summary() {
-    const events = (await this.lines()).map((line) => { try { return JSON.parse(line); } catch { return null; } }).filter(Boolean);
-    const predictions = events.filter((item) => item.eventType === "prediction");
-    const feedback = events.filter((item) => item.eventType === "expert_feedback" && item.labelStatus === "validated");
     const model = await this.currentModel();
-    return { modelVersion: model.modelVersion, modelType: model.modelType, predictions: predictions.length, validatedFeedback: feedback.length, minimumForTraining: model.promotionPolicy?.minValidatedExamples || 70, readyForTraining: feedback.length >= (model.promotionPolicy?.minValidatedExamples || 70), lastEventAt: events.at(-1)?.occurredAt || null, persistenceMode: process.env.PI5_DATA_DIR ? "configured-directory" : "ephemeral-demo" };
+    const minimumForTraining = model.promotionPolicy?.minValidatedExamples || 70;
+    const persistence = await this.repository.summary({ minimumForTraining });
+    return { modelVersion: model.modelVersion, modelType: model.modelType, ...persistence };
   }
-  async exportJsonl() { return (await this.lines()).join("\n") + ((await this.lines()).length ? "\n" : ""); }
+  async health() {
+    const model = await this.currentModel();
+    return { modelVersion: model.modelVersion, modelType: model.modelType, ...(await this.repository.health()) };
+  }
+  async exportJsonl() { return this.repository.exportJsonl(); }
+  async close() { return this.repository.close(); }
 }

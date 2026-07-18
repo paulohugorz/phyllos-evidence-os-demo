@@ -73,6 +73,7 @@ async function api(req, res, url) {
     const dossier = store.freezeDossier(ctx, { name: "Dossiê do piloto", productIds: products.map((x) => x.id) });
     return json(res, 201, { id: dossier.id, sha256: dossier.sha256, frozenAt: dossier.frozenAt, productCount: products.length, limitation: dossier.snapshot.limitations });
   }
+  if (req.method === "GET" && url.pathname === "/api/v1/pi5/health") return json(res, 200, await pi5MLOps.health());
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/model") return json(res, 200, await pi5MLOps.currentModel());
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/summary") return json(res, 200, await pi5MLOps.summary());
   if (req.method === "POST" && url.pathname === "/api/v1/pi5/predict") return json(res, 201, await pi5MLOps.predict(await body(req)));
@@ -154,6 +155,19 @@ const server = createServer(async (req, res) => {
     return json(res, 400, { error: error.message, code: error.code || "BAD_REQUEST" });
   }
 });
+
+
+let shuttingDown = false;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`Encerrando PHYLLOS por ${signal}`);
+  try { await pi5MLOps.close(); }
+  finally { server.close(() => process.exit(0)); }
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 const port = Number(process.env.PORT || 3000);
 server.listen(port, "0.0.0.0", () => console.log(`PHYLLOS Evidence OS em http://0.0.0.0:${port}`));
