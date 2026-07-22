@@ -6,12 +6,16 @@ import { id, now } from "./ids.js";
 const clone = (value) => structuredClone(value);
 const freeze = (value) => Object.freeze(clone(value));
 const hash = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+const allowedCollectionStatuses = new Set(["draft", "active", "archived"]);
+const allowedSkuStatuses = new Set(["draft", "active", "archived"]);
 
 export class EvidenceStore {
   #tenants = new Map();
   #organizations = new Map();
   #memberships = new Map();
+  #collections = new Map();
   #products = new Map();
+  #skus = new Map();
   #facts = new Map();
   #documents = new Map();
   #evidence = new Map();
@@ -33,10 +37,33 @@ export class EvidenceStore {
   createOrganization(ctx, { name, externalCode, type = "buyer" }) {
     this.#require(ctx, ["phyllos_admin", "client_admin"]);
     invariant(name?.trim(), "INVALID_ORGANIZATION", "Nome obrigatório");
-    const row = freeze({ id: id(), tenantId: ctx.tenantId, name: name.trim(), externalCode, type, createdAt: now() });
+    if (externalCode) {
+      invariant(
+        ![...this.#organizations.values()].some(
+          (x) => x.tenantId === ctx.tenantId && x.externalCode === externalCode,
+        ),
+        "DUPLICATE_ORGANIZATION",
+        "Código externo de organização já existe",
+      );
+    }
+    const row = freeze({
+      id: id(),
+      tenantId: ctx.tenantId,
+      name: name.trim(),
+      externalCode: externalCode || null,
+      type,
+      createdAt: now(),
+    });
     this.#organizations.set(row.id, row);
     this.#record(ctx.tenantId, ctx.userId, "organization.created", "organization", row.id);
     return clone(row);
+  }
+
+  listOrganizations(ctx) {
+    this.#require(ctx, ["phyllos_admin", "client_admin", "analyst", "reviewer", "viewer"]);
+    return [...this.#organizations.values()]
+      .filter((x) => x.tenantId === ctx.tenantId)
+      .map(clone);
   }
 
   addMembership(ctx, { userId, organizationId, role }) {
@@ -48,20 +75,151 @@ export class EvidenceStore {
     return clone(row);
   }
 
-  createProduct(ctx, { externalCode, name, ownerOrganizationId }) {
+  createCollection(ctx, { externalCode, name, ownerOrganizationId, status = "draft", season = null }) {
     this.#require(ctx, ["client_admin", "analyst"]);
     this.#owned(this.#organizations, ownerOrganizationId, ctx.tenantId);
-    invariant(externalCode && name, "INVALID_PRODUCT", "Código e nome obrigatórios");
-    invariant(![...this.#products.values()].some((x) => x.tenantId === ctx.tenantId && x.externalCode === externalCode), "DUPLICATE_PRODUCT", "Produto duplicado");
-    const row = freeze({ id: id(), tenantId: ctx.tenantId, externalCode, name, ownerOrganizationId, createdAt: now() });
+    invariant(externalCode?.trim() && name?.trim(), "INVALID_COLLECTION", "Código e nome da coleção são obrigatórios");
+    invariant(allowedCollectionStatuses.has(status), "INVALID_COLLECTION_STATUS", "Status de coleção inválido");
+    invariant(
+      ![...this.#collections.values()].some(
+        (x) => x.tenantId === ctx.tenantId && x.externalCode === externalCode.trim(),
+      ),
+      "DUPLICATE_COLLECTION",
+      "Coleção duplicada",
+    );
+    const row = freeze({
+      id: id(),
+      tenantId: ctx.tenantId,
+      externalCode: externalCode.trim(),
+      name: name.trim(),
+      ownerOrganizationId,
+      status,
+      season,
+      createdAt: now(),
+    });
+    this.#collections.set(row.id, row);
+    this.#record(ctx.tenantId, ctx.userId, "collection.created", "collection", row.id);
+    return clone(row);
+  }
+
+  listCollections(ctx, { ownerOrganizationId = null } = {}) {
+    this.#require(ctx, ["client_admin", "analyst", "reviewer", "viewer"]);
+    if (ownerOrganizationId) this.#owned(this.#organizations, ownerOrganizationId, ctx.tenantId);
+    return [...this.#collections.values()]
+      .filter(
+        (x) =>
+          x.tenantId === ctx.tenantId &&
+          (!ownerOrganizationId || x.ownerOrganizationId === ownerOrganizationId),
+      )
+      .map(clone);
+  }
+
+  createProduct(
+    ctx,
+    {
+      externalCode,
+      name,
+      ownerOrganizationId,
+      collectionId = null,
+      category = null,
+      description = null,
+    },
+  ) {
+    this.#require(ctx, ["client_admin", "analyst"]);
+    this.#owned(this.#organizations, ownerOrganizationId, ctx.tenantId);
+    if (collectionId) {
+      const collection = this.#owned(this.#collections, collectionId, ctx.tenantId);
+      invariant(
+        collection.ownerOrganizationId === ownerOrganizationId,
+        "COLLECTION_ORGANIZATION_MISMATCH",
+        "A coleção e o produto devem pertencer à mesma organização",
+      );
+    }
+    invariant(externalCode?.trim() && name?.trim(), "INVALID_PRODUCT", "Código e nome obrigatórios");
+    invariant(
+      ![...this.#products.values()].some(
+        (x) => x.tenantId === ctx.tenantId && x.externalCode === externalCode.trim(),
+      ),
+      "DUPLICATE_PRODUCT",
+      "Produto duplicado",
+    );
+    const row = freeze({
+      id: id(),
+      tenantId: ctx.tenantId,
+      externalCode: externalCode.trim(),
+      name: name.trim(),
+      ownerOrganizationId,
+      collectionId,
+      category,
+      description,
+      createdAt: now(),
+    });
     this.#products.set(row.id, row);
     this.#record(ctx.tenantId, ctx.userId, "product.created", "product", row.id);
     return clone(row);
   }
 
-  listProducts(ctx) {
+  listProducts(ctx, { collectionId = null, ownerOrganizationId = null } = {}) {
     this.#require(ctx, ["client_admin", "analyst", "reviewer", "viewer"]);
-    return [...this.#products.values()].filter((x) => x.tenantId === ctx.tenantId).map(clone);
+    if (collectionId) this.#owned(this.#collections, collectionId, ctx.tenantId);
+    if (ownerOrganizationId) this.#owned(this.#organizations, ownerOrganizationId, ctx.tenantId);
+    return [...this.#products.values()]
+      .filter(
+        (x) =>
+          x.tenantId === ctx.tenantId &&
+          (!collectionId || x.collectionId === collectionId) &&
+          (!ownerOrganizationId || x.ownerOrganizationId === ownerOrganizationId),
+      )
+      .map(clone);
+  }
+
+  createSku(
+    ctx,
+    {
+      productId,
+      externalCode,
+      name = null,
+      variant = {},
+      gtin = null,
+      status = "draft",
+    },
+  ) {
+    this.#require(ctx, ["client_admin", "analyst"]);
+    const product = this.#owned(this.#products, productId, ctx.tenantId);
+    invariant(externalCode?.trim(), "INVALID_SKU", "Código do SKU é obrigatório");
+    invariant(allowedSkuStatuses.has(status), "INVALID_SKU_STATUS", "Status de SKU inválido");
+    if (gtin !== null && gtin !== "") {
+      invariant(/^\d{8,14}$/.test(String(gtin)), "INVALID_GTIN", "GTIN deve conter de 8 a 14 dígitos");
+    }
+    invariant(
+      ![...this.#skus.values()].some(
+        (x) => x.tenantId === ctx.tenantId && x.externalCode === externalCode.trim(),
+      ),
+      "DUPLICATE_SKU",
+      "SKU duplicado",
+    );
+    const row = freeze({
+      id: id(),
+      tenantId: ctx.tenantId,
+      productId: product.id,
+      externalCode: externalCode.trim(),
+      name: name?.trim() || product.name,
+      variant: clone(variant),
+      gtin: gtin ? String(gtin) : null,
+      status,
+      createdAt: now(),
+    });
+    this.#skus.set(row.id, row);
+    this.#record(ctx.tenantId, ctx.userId, "sku.created", "sku", row.id);
+    return clone(row);
+  }
+
+  listSkus(ctx, { productId = null } = {}) {
+    this.#require(ctx, ["client_admin", "analyst", "reviewer", "viewer"]);
+    if (productId) this.#owned(this.#products, productId, ctx.tenantId);
+    return [...this.#skus.values()]
+      .filter((x) => x.tenantId === ctx.tenantId && (!productId || x.productId === productId))
+      .map(clone);
   }
 
   createFact(ctx, { entityType, entityId, semanticKey, value, sourceType, epistemicStatus, validTo = null }) {
@@ -156,6 +314,7 @@ export class EvidenceStore {
     const snapshot = {
       tenantId: ctx.tenantId, name, cutoffAt,
       products: [...this.#products.values()].filter((x) => productIds.includes(x.id) && x.tenantId === ctx.tenantId).map(clone),
+      skus: [...this.#skus.values()].filter((x) => productIds.includes(x.productId) && x.tenantId === ctx.tenantId).map(clone),
       facts: [...this.#facts.values()].filter((x) => productIds.includes(x.entityId) && x.tenantId === ctx.tenantId).map(clone),
       evidence: [...this.#evidence.values()].filter((x) => x.tenantId === ctx.tenantId).map(clone),
       findings: [...this.#findings.values()].filter((x) => productIds.includes(x.productId) && x.tenantId === ctx.tenantId).map(clone),
@@ -192,7 +351,12 @@ export class EvidenceStore {
   }
 
   #assertEntity(ctx, type, entityId) {
-    const stores = { product: this.#products, organization: this.#organizations };
+    const stores = {
+      product: this.#products,
+      sku: this.#skus,
+      collection: this.#collections,
+      organization: this.#organizations,
+    };
     invariant(stores[type], "UNSUPPORTED_ENTITY", `Entidade não suportada: ${type}`);
     this.#owned(stores[type], entityId, ctx.tenantId);
   }

@@ -5,7 +5,15 @@ services:
     plan: free
     buildCommand: ""
     startCommand: node src/server.js
-    healthCheckPath: /api/v1/dashboard
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
+      - key: NODE_ENV
+        value: production
+      - key: PHYLLOS_OPERATOR_TOKEN
+        sync: false
+      - key: PHYLLOS_OPERATOR_USER_ID
+        value: internal-operator
+      - key: PHYLLOS_OPERATOR_ROLE
+        value: client_admin
