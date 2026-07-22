@@ -4,6 +4,8 @@
 **Demais fases:** bloqueadas até decisão humana de go/no-go  
 **Estratégia:** Neon Auth para identidade e sessão; autorização PHYLLOS no backend Node; contexto transacional próprio; PostgreSQL RLS como defesa em profundidade.
 
+> Colaboração simultânea, concorrência e sincronização pertencem ao ciclo dependente [IAM-WORKSPACE-02](IAM-WORKSPACE-02-ADR.md). A conclusão deste ADR não autoriza a alegação de workspace multiusuário operacional.
+
 ## Decisões vinculantes
 
 1. A Fase 0 usa branch Neon isolada, dados sintéticos, feature flag e descarte planejado.
@@ -129,4 +131,3 @@ A decisão de go/no-go requer:
 - decisão humana registrada.
 
 Sem esses itens, Fase 0.1, migrations, RLS e troca da credencial do Render permanecem bloqueados.
-
