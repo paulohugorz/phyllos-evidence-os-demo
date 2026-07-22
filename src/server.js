@@ -101,6 +101,7 @@ const accessibilityAssetsVersion = "20260717-visual-2";
 
 const onboardingAssetsVersion = "20260718-onboarding-1";
 const usageAssetsVersion = "20260721-usage-1";
+const iamAssetsVersion = "20260722-iam-1";
 
 function enhanceIndexHtml(html) {
   let next = html;
@@ -142,6 +143,14 @@ function enhanceIndexHtml(html) {
   }
   if (!next.includes("usage-telemetry.js")) {
     next = next.replace("</body>", `  <script type="module" src="/usage-telemetry.js?v=${usageAssetsVersion}"></script>
+</body>`);
+  }
+  if (!next.includes("iam-workspaces.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/iam-workspaces.css?v=${iamAssetsVersion}">
+</head>`);
+  }
+  if (!next.includes("iam-workspaces.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/iam-workspaces.js?v=${iamAssetsVersion}"></script>
 </body>`);
   }
 
