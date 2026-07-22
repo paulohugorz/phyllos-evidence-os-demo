@@ -1,5 +1,7 @@
 # Autenticação e workspaces — próximo ciclo
 
+> **Substituído para execução:** o baseline vigente é o [ADR IAM-WORKSPACE-01 v1.2](IAM-WORKSPACE-01-ADR-v1.2.md). Este arquivo permanece como histórico do direcionamento inicial.
+
 ## Resultado esperado
 
 Após autenticar por e-mail ou provedor social, cada pessoa entra em um workspace individual ou cria/participa de um workspace de time. Recursos, evidências, eventos e configurações pertencem ao workspace ativo e nunca são consultados apenas por `userId`.
