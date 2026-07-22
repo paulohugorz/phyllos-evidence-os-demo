@@ -7,11 +7,14 @@ import { fileURLToPath } from "node:url";
 import { EvidenceStore } from "./store.js";
 import { PI5MLOpsStore } from "./pi5-mlops.js";
 import { createUsageRepository } from "./usage-telemetry.js";
+import { CollaborationStore, IAMError, iamPhase0Enabled } from "./iam-collaboration.js";
 
 const root = fileURLToPath(new URL("../public/", import.meta.url));
 const store = new EvidenceStore();
 const pi5MLOps = new PI5MLOpsStore();
 const usageRepository = createUsageRepository();
+const collaboration = new CollaborationStore();
+const iamEnabled = iamPhase0Enabled();
 const tenant = store.createTenant({ name: "PHYLLOS Demo", slug: "phyllos-demo" });
 const ctx = { tenantId: tenant.id, userId: "demo-analyst", role: "client_admin" };
 const org = store.createOrganization(ctx, { name: "Marca Horizonte", externalCode: "MH-01" });
@@ -63,6 +66,31 @@ function snapshot() {
 }
 
 async function api(req, res, url) {
+  if (req.method === "GET" && url.pathname === "/api/v1/iam/status") {
+    return json(res, 200, { enabled: iamEnabled, phase: "phase-0", persistence: "process-local", production_ready: false });
+  }
+  if (url.pathname.startsWith("/api/v1/iam/phase0/")) {
+    if (!iamEnabled) return json(res, 404, { error: "Endpoint não encontrado", code: "IAM_PHASE0_DISABLED" });
+    const actorUserId = req.headers["x-phyllos-test-user"];
+    if (!actorUserId || process.env.NODE_ENV === "production") {
+      return json(res, 401, { error: "Identidade de teste indisponível", code: "PHASE0_IDENTITY_REQUIRED" });
+    }
+    const match = url.pathname.match(/^\/api\/v1\/iam\/phase0\/workspaces\/([^/]+)\/resources(?:\/([^/]+))?$/);
+    if (match && req.method === "GET" && !match[2]) {
+      return json(res, 200, collaboration.listResources({ workspaceId: match[1], updatedSince: url.searchParams.get("updated_since") }));
+    }
+    if (match && req.method === "POST" && !match[2]) {
+      const result = collaboration.createResource({ workspaceId: match[1], actorUserId, idempotencyKey: req.headers["idempotency-key"], input: await body(req) });
+      res.setHeader("idempotency-replayed", String(result.replay));
+      return json(res, result.status, result.body);
+    }
+    if (match && req.method === "PATCH" && match[2]) {
+      const input = await body(req);
+      const ifMatch = String(req.headers["if-match"] || "").replace(/^W\//, "").replace(/^\"|\"$/g, "");
+      const expectedVersion = Number(ifMatch || input.expected_version);
+      return json(res, 200, collaboration.updateResource({ workspaceId: match[1], resourceId: match[2], actorUserId, expectedVersion, input }));
+    }
+  }
   if (req.method === "GET" && url.pathname === "/api/v1/dashboard") return json(res, 200, snapshot());
   if (req.method === "POST" && url.pathname === "/api/v1/usage-events") {
     const event = await usageRepository.append(await body(req));
@@ -183,6 +211,7 @@ const server = createServer(async (req, res) => {
     if (url.pathname.startsWith("/api/")) return await api(req, res, url);
     return await serveStatic(res, url.pathname);
   } catch (error) {
+    if (error instanceof IAMError) return json(res, error.status, { error: error.code, message: error.message, ...error.details });
     return json(res, 400, { error: error.message, code: error.code || "BAD_REQUEST" });
   }
 });

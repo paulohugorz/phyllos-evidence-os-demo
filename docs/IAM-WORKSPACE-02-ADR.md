@@ -2,7 +2,7 @@
 
 ## Colaboração multiusuário, concorrência, idempotência e sincronização
 
-**Status:** aprovado para detalhamento; implementação bloqueada pelos gates do IAM-WORKSPACE-01  
+**Status:** Incremento 1 implementado localmente como referência de Fase 0; produção continua bloqueada pelos gates do IAM-WORKSPACE-01
 **Dependência:** [IAM-WORKSPACE-01 v1.2](IAM-WORKSPACE-01-ADR-v1.2.md)  
 **Objetivo:** permitir trabalho simultâneo no mesmo workspace sem perda silenciosa, duplicação, vazamento ou inconsistência.
 
@@ -265,3 +265,29 @@ IAM-WORKSPACE-02 somente será aprovado quando:
 
 A alegação de “workspace multiusuário operacional” permanece proibida até a aprovação destes gates.
 
+## Evidência de implementação — Incremento 1
+
+Implementado em 22/07/2026:
+
+- `src/iam-collaboration.js`: referência executável em memória para versionamento otimista, idempotência, segregação por workspace, revisão incremental e proteção do último owner;
+- `src/server.js`: status público da flag e endpoints experimentais sob `/api/v1/iam/phase0`, inacessíveis quando `IAM_PHASE0_ENABLED` não é exatamente `true`;
+- identidade sintética via `X-Phyllos-Test-User` somente fora de `NODE_ENV=production`;
+- `test/iam-collaboration.test.js`: testes de flag deny-by-default, replay, mismatch de payload, conflito de versão, isolamento e último owner.
+
+Limitações explícitas:
+
+- a persistência é local ao processo e se perde em reinício;
+- não há sessão Neon Auth, RLS, convite por e-mail nem transação PostgreSQL neste incremento;
+- o header de identidade é instrumento de teste e é recusado em produção;
+- os endpoints não autorizam declarar colaboração multiusuário operacional.
+
+Contrato experimental:
+
+```text
+GET   /api/v1/iam/status
+GET   /api/v1/iam/phase0/workspaces/:workspaceId/resources?updated_since=...
+POST  /api/v1/iam/phase0/workspaces/:workspaceId/resources
+PATCH /api/v1/iam/phase0/workspaces/:workspaceId/resources/:resourceId
+```
+
+`POST` exige `Idempotency-Key`. `PATCH` exige `If-Match` ou `expected_version`. O próximo incremento substitui o store de referência por PostgreSQL/Neon, adiciona autorização real e executa os casos do IAM-WORKSPACE-01.
