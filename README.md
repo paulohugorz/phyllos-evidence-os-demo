@@ -35,6 +35,11 @@ npm run demo
 - importação validada e idempotente;
 - dossiê congelado com hash reproduzível;
 - audit log segregado por tenant.
+- telemetria transversal de usabilidade, minimizada e persistida separadamente dos eventos de MLOps.
+
+Contrato e limites: [docs/USAGE-TELEMETRY.md](docs/USAGE-TELEMETRY.md).
+
+Próximo ciclo de identidade, workspaces individuais e times: [docs/AUTH-WORKSPACES-ROADMAP.md](docs/AUTH-WORKSPACES-ROADMAP.md).
 
 ## Limites deliberados
 

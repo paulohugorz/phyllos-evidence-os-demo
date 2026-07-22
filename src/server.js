@@ -6,10 +6,12 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceStore } from "./store.js";
 import { PI5MLOpsStore } from "./pi5-mlops.js";
+import { createUsageRepository } from "./usage-telemetry.js";
 
 const root = fileURLToPath(new URL("../public/", import.meta.url));
 const store = new EvidenceStore();
 const pi5MLOps = new PI5MLOpsStore();
+const usageRepository = createUsageRepository();
 const tenant = store.createTenant({ name: "PHYLLOS Demo", slug: "phyllos-demo" });
 const ctx = { tenantId: tenant.id, userId: "demo-analyst", role: "client_admin" };
 const org = store.createOrganization(ctx, { name: "Marca Horizonte", externalCode: "MH-01" });
@@ -62,6 +64,10 @@ function snapshot() {
 
 async function api(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/v1/dashboard") return json(res, 200, snapshot());
+  if (req.method === "POST" && url.pathname === "/api/v1/usage-events") {
+    const event = await usageRepository.append(await body(req));
+    return json(res, 202, { accepted: true, duplicate: Boolean(event.duplicate), eventId: event.eventId });
+  }
   if (req.method === "POST" && url.pathname === "/api/v1/tasks") {
     const input = await body(req);
     const finding = findings.find((x) => x.id === input.findingId);
@@ -94,6 +100,7 @@ const pi5AssetsVersion = "20260718-pi5-1";
 const accessibilityAssetsVersion = "20260717-visual-2";
 
 const onboardingAssetsVersion = "20260718-onboarding-1";
+const usageAssetsVersion = "20260721-usage-1";
 
 function enhanceIndexHtml(html) {
   let next = html;
@@ -131,6 +138,10 @@ function enhanceIndexHtml(html) {
   }
   if (!next.includes("onboarding.js")) {
     next = next.replace("</body>", `  <script type="module" src="/onboarding.js?v=${onboardingAssetsVersion}"></script>
+</body>`);
+  }
+  if (!next.includes("usage-telemetry.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/usage-telemetry.js?v=${usageAssetsVersion}"></script>
 </body>`);
   }
 
@@ -173,7 +184,7 @@ async function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
   console.log(`Encerrando PHYLLOS por ${signal}`);
-  try { await pi5MLOps.close(); }
+  try { await Promise.all([pi5MLOps.close(), usageRepository.close()]); }
   finally { server.close(() => process.exit(0)); }
   setTimeout(() => process.exit(1), 10000).unref();
 }
