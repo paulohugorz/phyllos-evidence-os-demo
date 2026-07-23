@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceStore } from "./store.js";
+import { handleMaterialsPilotApi } from "./materials-pilot.js";
 import { PI5MLOpsStore } from "./pi5-mlops.js";
 import { createUsageRepository } from "./usage-telemetry.js";
 import { CollaborationStore, IAMError, iamPhase0Enabled } from "./iam-collaboration.js";
@@ -66,6 +67,7 @@ function snapshot() {
 }
 
 async function api(req, res, url) {
+  if (await handleMaterialsPilotApi({ req, res, url, json })) return;
   if (req.method === "GET" && url.pathname === "/api/v1/iam/status") {
     return json(res, 200, { enabled: iamEnabled, phase: "phase-0", persistence: "process-local", production_ready: false });
   }
@@ -180,6 +182,13 @@ function enhanceIndexHtml(html) {
   if (!next.includes("iam-workspaces.js")) {
     next = next.replace("</body>", `  <script type="module" src="/iam-workspaces.js?v=${iamAssetsVersion}"></script>
 </body>`);
+  }
+
+  if (!next.includes("materials-knowledge.css")) {
+    next = next.replace("</head>", '  <link rel="stylesheet" href="/materials-knowledge.css?v=20260723-materials-1">\n</head>');
+  }
+  if (!next.includes("materials-knowledge.js")) {
+    next = next.replace("</body>", '  <script type="module" src="/materials-knowledge.js?v=20260723-materials-1"></script>\n</body>');
   }
 
   return next;
