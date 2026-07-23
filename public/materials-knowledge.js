@@ -1,74 +1,74 @@
-const API_BASE = "/api/v1/materials-demo";
-const STORAGE_KEY = "phyllos-material-applications-v1";
-const PRODUCT_VERTICAL_KEY = "phyllos-material-product-verticals-v1";
+const API_BASE = "/api/v1/materials";
 const $ = (selector, root = document) => root.querySelector(selector);
 const all = (selector, root = document) => [...root.querySelectorAll(selector)];
-const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const verticalLabels = { apparel: "Confecção", footwear: "Calçados", accessory: "Acessórios", packaging: "Embalagem" };
-const confidenceLabels = {
-  unknown: "Desconhecido",
-  declared_by_brand: "Declarado pela marca",
-  declared_by_supplier: "Declarado pelo fornecedor",
-  documented: "Documentado",
-  laboratory_tested: "Testado em laboratório",
-  reviewed: "Revisado",
-  validated: "Validado",
-  conflicting: "Conflitante",
-  expired: "Vencido",
-  superseded: "Substituído",
+const originLabels = {
+  plant: "Vegetal", animal: "Animal", regenerated_cellulosic: "Celulósica regenerada",
+  fossil_synthetic: "Sintética fóssil", mineral: "Mineral", mixed: "Mista", other: "Outra",
 };
-const claimStatusLabels = {
-  draft: "Rascunho",
-  evidence_requested: "Evidência pendente",
-  under_review: "Em revisão",
-  substantiated: "Sustentado",
-  approved_for_buyer: "Aprovado para buyer",
-  approved_for_publication: "Aprovado para publicação",
-  unsupported: "Não sustentado",
-  rejected: "Rejeitado",
+const confidenceLabels = {
+  unknown: "Desconhecido", declared_by_brand: "Declarado pela marca",
+  declared_by_supplier: "Declarado pelo fornecedor", documented: "Documentado",
+  laboratory_tested: "Testado em laboratório", reviewed: "Revisado", validated: "Validado",
+  conflicting: "Conflitante", expired: "Vencido", superseded: "Substituído",
 };
 
 const state = {
   status: null,
   filters: null,
+  tab: "catalog",
   materials: [],
   articles: [],
-  components: [],
   products: [],
-  selectedProductKey: null,
+  suppliers: [],
+  components: [],
+  applications: [],
+  selectedSkuId: null,
   selectedVertical: "apparel",
-  tab: "catalog",
-  picker: { componentCode: null, materialId: null, articleId: null },
-  applications: readJson(STORAGE_KEY, []),
-  productVerticals: readJson(PRODUCT_VERTICAL_KEY, {}),
+  picker: { componentId: null, materialId: null, articleId: null },
+  articleDialogContext: null,
 };
-
-function readJson(key, fallback) {
-  try {
-    const value = JSON.parse(localStorage.getItem(key) || "null");
-    return value ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
 
 function toast(message) {
   const host = $("#toast");
   if (!host) return;
   host.textContent = message;
   host.classList.add("show");
-  setTimeout(() => host.classList.remove("show"), 2600);
+  setTimeout(() => host.classList.remove("show"), 2800);
 }
 
-async function fetchJson(path) {
-  const response = await fetch(`${API_BASE}${path}`, { headers: { accept: "application/json" } });
+function idempotencyKey() {
+  return crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function api(path, { method = "GET", body, headers = {} } = {}) {
+  const options = {
+    method,
+    headers: { accept: "application/json", ...headers },
+  };
+  if (body !== undefined) {
+    options.headers["content-type"] = "application/json";
+    options.body = JSON.stringify(body);
+  }
+  const response = await fetch(`${API_BASE}${path}`, options);
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.message || payload.error || `Falha ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(payload.message || payload.error || `Falha HTTP ${response.status}`);
+    error.code = payload.error;
+    error.status = response.status;
+    error.details = payload;
+    throw error;
+  }
   return payload;
+}
+
+function params(values) {
+  const search = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== "" && value !== null && value !== undefined) search.set(key, value);
+  });
+  return search.toString();
 }
 
 function installNavigation() {
@@ -78,7 +78,6 @@ function installNavigation() {
   const button = document.createElement("button");
   button.className = "nav";
   button.dataset.view = "materials";
-  button.dataset.telemetry = "materials_catalog_viewed";
   button.innerHTML = "<span>10</span> Materiais";
   button.addEventListener("click", showMaterials);
   nav.append(button);
@@ -92,58 +91,54 @@ function installView() {
   section.innerHTML = `
     <div class="materials-hero">
       <div>
-        <p class="eyebrow">MATERIALS KNOWLEDGE BASE · PILOTO INTEGRADO</p>
-        <h2>Materiais, artigos e aplicações em um só fluxo.</h2>
-        <p>Pesquise a base canônica, consulte evidências e aplique um artigo comercial ao componente real de uma peça.</p>
+        <p class="eyebrow">MATERIALS KNOWLEDGE BASE · API PERSISTENTE</p>
+        <h2>Do catálogo técnico à configuração verificável da peça.</h2>
+        <p>Consulte o catálogo PostgreSQL, cadastre artigos comerciais e aplique-os aos componentes dos SKUs persistentes.</p>
       </div>
       <div class="materials-hero-actions">
-        <span id="materialsModeBadge" class="materials-mode">Carregando base…</span>
+        <span id="materialsModeBadge" class="materials-mode">Verificando API…</span>
         <button class="primary" id="openPieceMaterials">Configurar peça →</button>
       </div>
     </div>
 
+    <div id="materialsApiNotice"></div>
     <div id="materialsMetrics" class="metrics materials-metrics"></div>
 
     <div class="materials-tabs" role="tablist" aria-label="Base de materiais">
       <button class="active" data-materials-tab="catalog" role="tab">Materiais canônicos</button>
       <button data-materials-tab="articles" role="tab">Artigos comerciais</button>
-      <button data-materials-tab="applications" role="tab">Aplicações em peças</button>
+      <button data-materials-tab="applications" role="tab">Materiais da peça</button>
     </div>
 
     <div class="materials-search-panel">
-      <label class="materials-search-field">
-        <span>Pesquisar</span>
-        <input id="materialsSearch" type="search" placeholder="Material, sinônimo, código, fornecedor, certificação ou claim" autocomplete="off">
-      </label>
+      <div class="materials-toolbar-actions">
+        <label class="materials-search-field">
+          <span>Pesquisar</span>
+          <input id="materialsSearch" type="search" placeholder="Material, sinônimo, código ou fornecedor" autocomplete="off">
+        </label>
+        <button class="primary hidden" id="newCommercialArticle">+ Cadastrar artigo</button>
+      </div>
       <div class="materials-filter-grid">
         <label>Vertical<select id="materialsVertical"><option value="">Todas</option></select></label>
         <label>Família<select id="materialsFamily"><option value="">Todas</option></select></label>
         <label>Origem<select id="materialsOrigin"><option value="">Todas</option></select></label>
         <label>Estrutura<select id="materialsStructure"><option value="">Todas</option></select></label>
-        <label>Certificação<select id="materialsCertification"><option value="">Todas</option></select></label>
+        <label id="materialsCertificationField">Certificação<select id="materialsCertification" disabled><option value="">Indisponível nesta versão</option></select></label>
         <label>Evidência<select id="materialsEvidence"><option value="">Todas</option></select></label>
       </div>
+      <p id="materialsCapabilityNote" class="materials-capability-note"></p>
       <div class="materials-search-meta"><span id="materialsResultCount">—</span><button class="link" id="clearMaterialsFilters">Limpar filtros</button></div>
     </div>
 
-    <div id="materialsCatalogPanel" class="materials-panel">
-      <div id="materialsCatalog" class="materials-table-card"></div>
-    </div>
-
-    <div id="materialsArticlesPanel" class="materials-panel hidden">
-      <div id="materialsArticles" class="materials-table-card"></div>
-    </div>
+    <div id="materialsCatalogPanel" class="materials-panel"><div id="materialsCatalog" class="materials-table-card"></div></div>
+    <div id="materialsArticlesPanel" class="materials-panel hidden"><div id="materialsArticles" class="materials-table-card"></div></div>
 
     <div id="materialsApplicationsPanel" class="materials-panel hidden">
       <div class="piece-config-shell">
         <div class="piece-config-head">
-          <div>
-            <p class="eyebrow">CONFIGURAÇÃO DA PEÇA</p>
-            <h3>Materiais e componentes</h3>
-            <p>O material canônico, o artigo comercial e a aplicação permanecem separados.</p>
-          </div>
+          <div><p class="eyebrow">CONFIGURAÇÃO PERSISTENTE</p><h3>Materiais e componentes do SKU</h3><p>Somente SKUs persistidos no Buyer Readiness podem receber aplicações na Materials API.</p></div>
           <div class="piece-selector-grid">
-            <label>Peça<select id="materialsProductSelect"></select></label>
+            <label>SKU<select id="materialsProductSelect"></select></label>
             <label>Vertical<select id="materialsProductVertical"><option value="apparel">Confecção</option><option value="footwear">Calçados</option></select></label>
           </div>
         </div>
@@ -159,12 +154,8 @@ function installView() {
 
     <dialog id="materialPickerDialog" class="materials-dialog materials-picker-dialog">
       <button class="dialog-close" data-close-picker aria-label="Fechar">×</button>
-      <div class="picker-head">
-        <p class="eyebrow">APLICAR À PEÇA</p>
-        <h3 id="pickerTitle">Selecionar material</h3>
-        <p id="pickerContext"></p>
-      </div>
-      <label class="materials-search-field picker-search"><span>Buscar na base</span><input id="pickerSearch" type="search" placeholder="Nome, artigo, código ou fornecedor"></label>
+      <div class="picker-head"><p class="eyebrow">APLICAR AO SKU</p><h3 id="pickerTitle">Selecionar artigo comercial</h3><p id="pickerContext"></p></div>
+      <label class="materials-search-field picker-search"><span>Buscar na base</span><input id="pickerSearch" type="search" placeholder="Material, artigo, código ou fornecedor"></label>
       <div id="pickerResults" class="picker-results"></div>
       <form id="materialApplicationForm" class="application-form hidden">
         <div id="selectedMaterialSnapshot" class="selected-material-snapshot"></div>
@@ -174,9 +165,32 @@ function installView() {
           <label>Unidade<select name="quantityUnit"><option value="m">metro</option><option value="m2">metro quadrado</option><option value="kg">quilograma</option><option value="g">grama</option><option value="unit">unidade</option><option value="pair">par</option></select></label>
           <label>Confiança<select name="confidence"><option value="unknown">Desconhecido</option><option value="declared_by_brand">Declarado pela marca</option><option value="declared_by_supplier">Declarado pelo fornecedor</option><option value="documented">Documentado</option><option value="laboratory_tested">Testado em laboratório</option><option value="reviewed">Revisado</option><option value="validated">Validado</option><option value="conflicting">Conflitante</option></select></label>
           <label class="application-wide">Referência da evidência<input name="evidenceReference" placeholder="Ficha técnica, certificado, laudo ou declaração"></label>
-          <label class="application-wide">Observações<textarea name="notes" placeholder="Limitações, divergências ou decisões"></textarea></label>
+          <label class="application-wide">Observações<textarea name="notesPt" placeholder="Limitações, divergências ou decisões"></textarea></label>
         </div>
-        <div class="application-actions"><button type="button" class="link" id="cancelApplicationSelection">Trocar material</button><button type="submit" class="primary">Salvar aplicação</button></div>
+        <div class="application-actions"><button type="button" class="link" id="cancelApplicationSelection">Trocar artigo</button><button type="submit" class="primary">Salvar na Materials API</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="commercialArticleDialog" class="materials-dialog">
+      <button class="dialog-close" data-close-article-dialog aria-label="Fechar">×</button>
+      <div class="picker-head"><p class="eyebrow">ARTIGO COMERCIAL</p><h3>Cadastrar material fornecido</h3><p>O artigo representa o item efetivamente comprado; não altera o material canônico.</p></div>
+      <form id="commercialArticleForm" class="application-form">
+        <div class="article-form-grid">
+          <label>Fornecedor<select name="supplierOrganizationId" required></select></label>
+          <label>Material canônico<select name="primaryMaterialId" required></select></label>
+          <label>Código comercial<input name="commercialCode" required placeholder="Ex.: LIN-240"></label>
+          <label>Nome comercial<input name="commercialName" placeholder="Ex.: Linho Natural 240"></label>
+          <label>Gramatura (g/m²)<input name="weightGsm" type="number" min="0" step="0.01"></label>
+          <label>Largura (cm)<input name="widthCm" type="number" min="0" step="0.01"></label>
+          <label>Cor<input name="color"></label>
+          <label>Acabamento<input name="finish"></label>
+          <label>Composição inicial (%)<input name="primaryPercentage" type="number" min="0.01" max="100" step="0.01" value="100"></label>
+          <label>Origem do feedstock<select name="feedstockType"><option value="unknown">Não informada</option><option value="virgin">Virgem</option><option value="recycled_pre_consumer">Reciclado pré-consumo</option><option value="recycled_post_consumer">Reciclado pós-consumo</option><option value="reused">Reutilizado</option><option value="mass_balance">Balanço de massa</option></select></label>
+          <label>Confiança<select name="confidence"><option value="unknown">Desconhecida</option><option value="declared_by_supplier">Declarada pelo fornecedor</option><option value="documented">Documentada</option><option value="laboratory_tested">Testada em laboratório</option></select></label>
+          <label>Status<select name="status"><option value="draft">Rascunho</option><option value="active">Ativo</option></select></label>
+          <label class="article-form-wide">Base da declaração<textarea name="declarationBasis" placeholder="Documento, ficha, certificado ou informação recebida"></textarea></label>
+        </div>
+        <div class="article-dialog-actions"><button type="button" class="link" data-close-article-dialog>Cancelar</button><button type="submit" class="primary">Cadastrar artigo</button></div>
       </form>
     </dialog>
   `;
@@ -186,24 +200,23 @@ function installView() {
 function showMaterials() {
   all(".view").forEach((view) => view.classList.toggle("hidden", view.id !== "materials"));
   all(".nav").forEach((button) => button.classList.toggle("active", button.dataset.view === "materials"));
-  const title = $("#pageTitle");
-  if (title) title.textContent = "Materiais";
+  if ($("#pageTitle")) $("#pageTitle").textContent = "Materiais";
   window.scrollTo({ top: 0, behavior: "smooth" });
-  refreshProducts();
   renderCurrentTab();
 }
 
 function switchTab(tab) {
   state.tab = tab;
   all("[data-materials-tab]").forEach((button) => button.classList.toggle("active", button.dataset.materialsTab === tab));
-  $("#materialsCatalogPanel")?.classList.toggle("hidden", tab !== "catalog");
-  $("#materialsArticlesPanel")?.classList.toggle("hidden", tab !== "articles");
-  $("#materialsApplicationsPanel")?.classList.toggle("hidden", tab !== "applications");
+  $("#materialsCatalogPanel").classList.toggle("hidden", tab !== "catalog");
+  $("#materialsArticlesPanel").classList.toggle("hidden", tab !== "articles");
+  $("#materialsApplicationsPanel").classList.toggle("hidden", tab !== "applications");
+  $("#newCommercialArticle").classList.toggle("hidden", tab !== "articles");
   renderCurrentTab();
 }
 
 function optionMarkup(items = []) {
-  return items.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`).join("");
+  return items.map((item) => `<option value="${esc(item.value)}">${esc(item.label)}</option>`).join("");
 }
 
 function populateFilters() {
@@ -212,8 +225,12 @@ function populateFilters() {
   $("#materialsFamily").insertAdjacentHTML("beforeend", optionMarkup(state.filters.families));
   $("#materialsOrigin").insertAdjacentHTML("beforeend", optionMarkup(state.filters.origins));
   $("#materialsStructure").insertAdjacentHTML("beforeend", optionMarkup(state.filters.structures));
-  $("#materialsCertification").insertAdjacentHTML("beforeend", optionMarkup(state.filters.certifications));
-  $("#materialsEvidence").insertAdjacentHTML("beforeend", optionMarkup(state.filters.evidence));
+  $("#materialsEvidence").insertAdjacentHTML("beforeend", optionMarkup((state.filters.evidence || []).map((item) => ({ value: item.value, label: confidenceLabels[item.value] || item.label }))));
+  const capabilities = state.filters.capabilities || {};
+  if (!capabilities.certification_filter) {
+    $("#materialsCertificationField").classList.add("hidden");
+    $("#materialsCapabilityNote").textContent = capabilities.reason || "Filtros regulatórios dependem de vínculos ainda não modelados.";
+  }
 }
 
 function selectedFilters() {
@@ -223,100 +240,124 @@ function selectedFilters() {
     family: $("#materialsFamily")?.value || "",
     origin: $("#materialsOrigin")?.value || "",
     structure: $("#materialsStructure")?.value || "",
-    certification: $("#materialsCertification")?.value || "",
     evidence: $("#materialsEvidence")?.value || "",
   };
 }
 
-function queryString(input) {
-  const params = new URLSearchParams();
-  Object.entries(input).forEach(([key, value]) => {
-    if (value !== "" && value !== null && value !== undefined) params.set(key, value);
-  });
-  return params.toString();
-}
-
-async function refreshCatalog() {
-  const host = $("#materialsCatalog");
-  if (!host) return;
-  host.innerHTML = `<div class="materials-loading">Consultando a base de materiais…</div>`;
-  try {
-    const result = await fetchJson(`/catalog?${queryString({ ...selectedFilters(), limit: 120 })}`);
-    state.materials = result.items || [];
-    $("#materialsResultCount").textContent = `${state.materials.length} material(is) encontrado(s)`;
-    renderCatalog();
-  } catch (error) {
-    host.innerHTML = `<div class="materials-empty"><strong>Não foi possível consultar a base</strong><p>${escapeHtml(error.message)}</p></div>`;
+function renderStatus() {
+  const badge = $("#materialsModeBadge");
+  const notice = $("#materialsApiNotice");
+  if (!state.status) return;
+  badge.classList.remove("ready", "warning", "error");
+  if (state.status.runtime_ready) {
+    badge.textContent = `PostgreSQL · API v${state.status.version}`;
+    badge.classList.add("ready");
+    notice.innerHTML = "";
+  } else if (state.status.schema_ready) {
+    badge.textContent = "Catálogo ativo · tenant pendente";
+    badge.classList.add("warning");
+    notice.innerHTML = `<div class="materials-api-notice"><strong>Catálogo disponível; operações do tenant bloqueadas.</strong>Configure MATERIALS_TENANT_ID, MATERIALS_USER_ID e MATERIALS_ROLE no Render para acessar artigos, SKUs e aplicações.</div>`;
+  } else {
+    badge.textContent = "Materials API indisponível";
+    badge.classList.add("error");
+    notice.innerHTML = `<div class="materials-api-notice"><strong>Banco ou schema ainda não está pronto.</strong>${esc(state.status.reason || "Aplique as migrations 002 e 003 e confirme DATABASE_URL.")}</div>`;
   }
 }
 
-async function refreshArticles() {
-  const host = $("#materialsArticles");
+function renderMetrics() {
+  const host = $("#materialsMetrics");
   if (!host) return;
-  host.innerHTML = `<div class="materials-loading">Consultando artigos comerciais…</div>`;
-  try {
-    const filters = selectedFilters();
-    const result = await fetchJson(`/commercial-articles?${queryString({ query: filters.query, vertical: filters.vertical, evidence: filters.evidence })}`);
-    state.articles = result.items || [];
-    renderArticles();
-  } catch (error) {
-    host.innerHTML = `<div class="materials-empty"><strong>Não foi possível consultar os artigos</strong><p>${escapeHtml(error.message)}</p></div>`;
-  }
+  const documented = state.applications.filter((item) => ["documented", "laboratory_tested", "reviewed", "validated"].includes(item.confidence)).length;
+  host.innerHTML = [
+    ["Materiais canônicos", state.status?.canonical_materials ?? state.materials.length],
+    ["Artigos do tenant", state.status?.commercial_articles ?? state.articles.length],
+    ["Aplicações persistentes", state.status?.material_applications ?? state.applications.length],
+    ["Aplicações documentadas", documented],
+  ].map(([label, value]) => `<div class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 }
 
 function materialBadges(material) {
   return [
-    ...(material.vertical_labels || material.verticals?.map((item) => verticalLabels[item] || item) || []),
-    material.origin_label,
-    material.evidence_label || confidenceLabels[material.evidence_status],
-  ].filter(Boolean).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+    ...(material.verticals || []).map((value) => verticalLabels[value] || value),
+    originLabels[material.base_origin] || material.base_origin,
+    confidenceLabels[material.evidence_status] || material.evidence_status,
+  ].filter(Boolean).map((value) => `<span>${esc(value)}</span>`).join("");
+}
+
+async function refreshCatalog() {
+  const host = $("#materialsCatalog");
+  host.innerHTML = `<div class="materials-loading">Consultando o catálogo PostgreSQL…</div>`;
+  try {
+    const result = await api(`/catalog?${params({ ...selectedFilters(), limit: 120 })}`);
+    state.materials = result.items || [];
+    $("#materialsResultCount").textContent = `${result.total ?? state.materials.length} material(is)`;
+    renderCatalog();
+  } catch (error) {
+    host.innerHTML = errorPanel("Não foi possível consultar o catálogo", error);
+  }
 }
 
 function renderCatalog() {
   const host = $("#materialsCatalog");
-  if (!host) return;
   if (!state.materials.length) {
-    host.innerHTML = `<div class="materials-empty"><strong>Nenhum material corresponde aos filtros</strong><p>Remova um filtro ou pesquise por outro termo.</p></div>`;
+    host.innerHTML = `<div class="materials-empty"><strong>Nenhum material encontrado</strong><p>Altere a busca ou os filtros.</p></div>`;
     return;
   }
   host.innerHTML = `
     <div class="materials-table-head"><span>MATERIAL</span><span>CLASSIFICAÇÃO</span><span>EVIDÊNCIA</span><span>ARTIGOS</span><span>AÇÕES</span></div>
     ${state.materials.map((material) => `
-      <article class="materials-row" data-material-id="${escapeHtml(material.id)}">
-        <div><strong>${escapeHtml(material.canonical_name_pt)}</strong><small>${escapeHtml(material.technical_name || material.canonical_name_en || "")}</small><div class="material-mini-badges">${materialBadges(material)}</div></div>
-        <div><strong>${escapeHtml(material.family_name_pt)}</strong><small>${escapeHtml(material.structure)}</small></div>
-        <div><span class="evidence-state ${escapeHtml(material.evidence_status)}">${escapeHtml(material.evidence_label || confidenceLabels[material.evidence_status] || material.evidence_status)}</span><small>${escapeHtml(material.source_label || "Fonte não informada")}</small></div>
-        <div><strong>${Number(material.article_count || 0)}</strong><small>artigo(s)</small></div>
-        <div class="materials-row-actions"><button class="link material-detail" data-material-id="${escapeHtml(material.id)}">Consultar</button><button class="primary material-apply" data-material-id="${escapeHtml(material.id)}">Aplicar à peça</button></div>
+      <article class="materials-row">
+        <div><strong>${esc(material.canonical_name_pt)}</strong><small>${esc(material.technical_name || material.canonical_name_en || "")}</small><div class="material-mini-badges">${materialBadges(material)}</div></div>
+        <div><strong>${esc(material.family_name_pt)}</strong><small>${esc(material.structure || "Estrutura não informada")}</small></div>
+        <div><span class="evidence-state ${esc(material.evidence_status)}">${esc(confidenceLabels[material.evidence_status] || material.evidence_status)}</span><small>${esc(material.source_label || "Fonte não informada")}</small></div>
+        <div><strong>${Number(material.article_count || 0)}</strong><small>artigo(s) do tenant</small></div>
+        <div class="materials-row-actions"><button class="link material-detail" data-id="${esc(material.id)}">Consultar</button><button class="primary material-apply" data-id="${esc(material.id)}">Aplicar à peça</button></div>
       </article>
     `).join("")}`;
-  all(".material-detail", host).forEach((button) => button.addEventListener("click", () => openMaterialDetail(button.dataset.materialId)));
-  all(".material-apply", host).forEach((button) => button.addEventListener("click", () => beginApplicationFromMaterial(button.dataset.materialId)));
+  all(".material-detail", host).forEach((button) => button.addEventListener("click", () => openMaterialDetail(button.dataset.id)));
+  all(".material-apply", host).forEach((button) => button.addEventListener("click", () => beginApplicationFromMaterial(button.dataset.id)));
 }
 
 function compositionText(article) {
-  return (article.composition || []).map((item) => `${item.percentage}% ${item.material_name}`).join(" · ") || "Composição não informada";
+  const composition = article?.composition || [];
+  return composition.length
+    ? composition.map((item) => `${Number(item.percentage).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% ${item.material_name}`).join(" · ")
+    : "Composição não informada";
+}
+
+async function refreshArticles() {
+  const host = $("#materialsArticles");
+  host.innerHTML = `<div class="materials-loading">Consultando artigos do tenant…</div>`;
+  try {
+    const filter = selectedFilters();
+    const result = await api(`/commercial-articles?${params({ query: filter.query, vertical: filter.vertical, limit: 200 })}`);
+    state.articles = result.items || [];
+    $("#materialsResultCount").textContent = `${state.articles.length} artigo(s)`;
+    renderArticles();
+  } catch (error) {
+    host.innerHTML = errorPanel("Não foi possível consultar os artigos", error);
+  }
 }
 
 function renderArticles() {
   const host = $("#materialsArticles");
-  if (!host) return;
   if (!state.articles.length) {
-    host.innerHTML = `<div class="materials-empty"><strong>Nenhum artigo comercial encontrado</strong><p>Altere a busca ou os filtros.</p></div>`;
+    host.innerHTML = `<div class="materials-empty"><strong>Nenhum artigo comercial cadastrado</strong><p>Cadastre o item fornecido antes de aplicá-lo à peça.</p><button class="primary" id="emptyNewArticle">+ Cadastrar artigo</button></div>`;
+    $("#emptyNewArticle")?.addEventListener("click", () => openArticleDialog());
     return;
   }
   host.innerHTML = `
     <div class="materials-table-head articles-head"><span>ARTIGO</span><span>FORNECEDOR</span><span>COMPOSIÇÃO</span><span>EVIDÊNCIA</span><span>AÇÃO</span></div>
     ${state.articles.map((article) => `
       <article class="materials-row articles-row">
-        <div><strong>${escapeHtml(article.commercial_name)}</strong><small>${escapeHtml(article.commercial_code)}${article.weight_gsm ? ` · ${article.weight_gsm} g/m²` : ""}</small></div>
-        <div><strong>${escapeHtml(article.supplier_name)}</strong><small>${escapeHtml(article.vertical === "footwear" ? "Calçados" : "Confecção")}</small></div>
-        <div><strong>${escapeHtml(compositionText(article))}</strong><small>${escapeHtml(article.finish || "Sem acabamento informado")}</small></div>
-        <div><span class="evidence-state ${escapeHtml(article.evidence_status)}">${escapeHtml(confidenceLabels[article.evidence_status] || article.evidence_status)}</span><small>${escapeHtml((article.certifications || []).join(" · ") || "Sem certificação vinculada")}</small></div>
-        <div><button class="primary article-apply" data-material-id="${escapeHtml(article.material_id)}" data-article-id="${escapeHtml(article.id)}">Aplicar à peça</button></div>
+        <div><strong>${esc(article.commercial_name || article.commercial_code)}</strong><small>${esc(article.commercial_code)}${article.weight_gsm ? ` · ${esc(article.weight_gsm)} g/m²` : ""}</small></div>
+        <div><strong>${esc(article.supplier_name)}</strong><small>${(article.verticals || []).map((value) => verticalLabels[value] || value).join(" · ")}</small></div>
+        <div><strong>${esc(compositionText(article))}</strong><small>${esc(article.finish || "Sem acabamento informado")}</small></div>
+        <div><span class="evidence-state ${article.evidence_count ? "documented" : "unknown"}">${article.evidence_count ? `${article.evidence_count} vínculo(s)` : "Sem evidência"}</span><small class="status-${esc(article.status)}">${esc(article.status)}</small></div>
+        <div><button class="primary article-apply" data-material="${esc(article.primary_material_id)}" data-article="${esc(article.id)}">Aplicar à peça</button></div>
       </article>
     `).join("")}`;
-  all(".article-apply", host).forEach((button) => button.addEventListener("click", () => beginApplicationFromMaterial(button.dataset.materialId, button.dataset.articleId)));
+  all(".article-apply", host).forEach((button) => button.addEventListener("click", () => beginApplicationFromMaterial(button.dataset.material, button.dataset.article)));
 }
 
 async function openMaterialDetail(materialId) {
@@ -325,126 +366,131 @@ async function openMaterialDetail(materialId) {
   content.innerHTML = `<div class="materials-loading">Carregando detalhes…</div>`;
   dialog.showModal();
   try {
-    const material = await fetchJson(`/catalog/${encodeURIComponent(materialId)}`);
+    const material = await api(`/catalog/${encodeURIComponent(materialId)}`);
     content.innerHTML = `
-      <div class="material-detail-head"><p class="eyebrow">MATERIAL CANÔNICO · ${escapeHtml((material.vertical_labels || []).join(" · "))}</p><h2>${escapeHtml(material.canonical_name_pt)}</h2><p>${escapeHtml(material.technical_name)}</p><div class="material-mini-badges">${materialBadges(material)}</div></div>
-      <div class="material-detail-grid">
-        <section><span>Família</span><strong>${escapeHtml(material.family_name_pt)}</strong></section>
-        <section><span>Origem</span><strong>${escapeHtml(material.origin_label)}</strong></section>
-        <section><span>Estrutura</span><strong>${escapeHtml(material.structure)}</strong></section>
-        <section><span>Última revisão</span><strong>${escapeHtml(material.last_reviewed_at || "Não informada")}</strong></section>
-      </div>
-      <div class="material-detail-section"><h3>Visão técnica</h3><p>${escapeHtml(material.description_pt)}</p><div class="limit-note"><b>Limite</b><p>${escapeHtml(material.limitations_pt)}</p></div></div>
-      <div class="material-detail-section"><h3>Sinônimos</h3><div class="material-mini-badges">${(material.aliases || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("") || "<span>Nenhum</span>"}</div></div>
-      <div class="material-detail-section"><h3>Certificações relacionadas</h3><div class="material-mini-badges">${(material.certifications || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("") || "<span>Nenhuma vinculada</span>"}</div></div>
-      <div class="material-detail-section"><h3>Claims e requisitos</h3>${(material.claims || []).length ? material.claims.map((claim) => `<article class="claim-requirement"><div><strong>${escapeHtml(claim.label)}</strong><span>${escapeHtml(claimStatusLabels[claim.status] || claim.status)}</span></div><p>${escapeHtml(claim.requirement)}</p></article>`).join("") : "<p>Nenhum claim associado ao material canônico.</p>"}</div>
-      <div class="material-detail-section"><h3>Artigos comerciais</h3>${(material.commercial_articles || []).length ? material.commercial_articles.map((article) => `<article class="detail-article"><div><strong>${escapeHtml(article.commercial_name)}</strong><small>${escapeHtml(article.commercial_code)} · ${escapeHtml(article.supplier_name)}</small></div><span>${escapeHtml(compositionText(article))}</span><button class="link detail-article-apply" data-material-id="${escapeHtml(material.id)}" data-article-id="${escapeHtml(article.id)}">Aplicar</button></article>`).join("") : "<p>Nenhum artigo comercial associado.</p>"}</div>
+      <div class="material-detail-head"><p class="eyebrow">MATERIAL CANÔNICO · ${(material.verticals || []).map((value) => verticalLabels[value] || value).join(" · ")}</p><h2>${esc(material.canonical_name_pt)}</h2><p>${esc(material.technical_name || "")}</p><div class="material-mini-badges">${materialBadges(material)}</div></div>
+      <div class="material-detail-grid"><section><span>Família</span><strong>${esc(material.family_name_pt)}</strong></section><section><span>Origem</span><strong>${esc(originLabels[material.base_origin] || material.base_origin)}</strong></section><section><span>Estrutura</span><strong>${esc(material.structure || "Não informada")}</strong></section><section><span>Fonte</span><strong>${esc(material.source_label || "Não informada")}</strong></section></div>
+      <div class="material-detail-section"><h3>Sinônimos</h3><div class="material-mini-badges">${(material.aliases || []).map((item) => `<span>${esc(item)}</span>`).join("") || "<span>Nenhum</span>"}</div></div>
+      <div class="material-detail-section"><h3>Processos relacionados</h3><div class="material-mini-badges">${(material.processes || []).map((item) => `<span>${esc(item.name_pt)}</span>`).join("") || "<span>Nenhum vínculo registrado</span>"}</div></div>
+      <div class="material-detail-section"><h3>Limite de interpretação</h3><div class="limit-note"><p>${esc(material.limitations_pt)}</p></div></div>
+      <div class="material-detail-section"><h3>Artigos comerciais do tenant</h3>${(material.commercial_articles || []).length ? material.commercial_articles.map((article) => `<article class="detail-article"><div><strong>${esc(article.commercial_name || article.commercial_code)}</strong><small>${esc(article.commercial_code)} · ${esc(article.supplier_name)}</small></div><span>${esc(compositionText(article))}</span><button class="link detail-article-apply" data-material="${esc(material.id)}" data-article="${esc(article.id)}">Aplicar</button></article>`).join("") : `<p>Nenhum artigo comercial associado.</p><button class="primary detail-new-article" data-material="${esc(material.id)}">Cadastrar artigo deste material</button>`}</div>
     `;
-    all(".detail-article-apply", content).forEach((button) => button.addEventListener("click", () => {
-      dialog.close();
-      beginApplicationFromMaterial(button.dataset.materialId, button.dataset.articleId);
-    }));
+    all(".detail-article-apply", content).forEach((button) => button.addEventListener("click", () => { dialog.close(); beginApplicationFromMaterial(button.dataset.material, button.dataset.article); }));
+    $(".detail-new-article", content)?.addEventListener("click", () => { dialog.close(); openArticleDialog(material.id); });
   } catch (error) {
-    content.innerHTML = `<div class="materials-empty"><strong>Falha ao abrir material</strong><p>${escapeHtml(error.message)}</p></div>`;
+    content.innerHTML = errorPanel("Falha ao abrir o material", error);
   }
 }
 
 async function refreshProducts() {
-  const seeded = await fetch("/api/v1/dashboard").then((response) => response.ok ? response.json() : null).catch(() => null);
-  const local = readJson("phyllos-portfolio", []);
-  const products = [
-    ...((seeded?.products || []).map((item) => ({ key: item.externalCode, name: item.name, code: item.externalCode, source: "demo" }))),
-    ...(local.map((item) => ({ key: item.code || item.id, name: item.name, code: item.code || item.id, source: "portfolio", category: item.category }))),
-  ];
-  state.products = products.filter((item, index) => products.findIndex((candidate) => candidate.key === item.key) === index);
-  if (!state.selectedProductKey && state.products.length) state.selectedProductKey = state.products[0].key;
-  renderProductOptions();
+  try {
+    const result = await api("/skus");
+    state.products = result.items || [];
+    if (!state.selectedSkuId || !state.products.some((item) => item.id === state.selectedSkuId)) state.selectedSkuId = state.products[0]?.id || null;
+    const selected = selectedProduct();
+    state.selectedVertical = selected?.vertical || "apparel";
+    renderProductOptions();
+  } catch (error) {
+    state.products = [];
+    state.selectedSkuId = null;
+    renderProductOptions(error);
+  }
 }
 
-function renderProductOptions() {
+function renderProductOptions(error = null) {
   const select = $("#materialsProductSelect");
   if (!select) return;
-  select.innerHTML = state.products.length
-    ? state.products.map((product) => `<option value="${escapeHtml(product.key)}" ${product.key === state.selectedProductKey ? "selected" : ""}>${escapeHtml(product.name)} · ${escapeHtml(product.code)}</option>`).join("")
-    : `<option value="">Cadastre uma peça primeiro</option>`;
-  const savedVertical = state.productVerticals[state.selectedProductKey];
-  state.selectedVertical = savedVertical || inferProductVertical(state.products.find((item) => item.key === state.selectedProductKey));
+  if (error) select.innerHTML = `<option value="">Materials API sem contexto do tenant</option>`;
+  else if (!state.products.length) select.innerHTML = `<option value="">Nenhum SKU persistente</option>`;
+  else select.innerHTML = state.products.map((product) => `<option value="${esc(product.id)}" ${product.id === state.selectedSkuId ? "selected" : ""}>${esc(product.name)} · ${esc(product.code)}</option>`).join("");
   $("#materialsProductVertical").value = state.selectedVertical;
 }
 
-function inferProductVertical(product) {
-  const text = `${product?.name || ""} ${product?.category || ""}`.toLowerCase();
-  return /(sapato|tênis|tenis|sandália|sandalia|bota|calçado|calcado)/.test(text) ? "footwear" : "apparel";
+function selectedProduct() {
+  return state.products.find((item) => item.id === state.selectedSkuId) || null;
 }
 
 async function refreshComponents() {
   try {
-    const result = await fetchJson(`/component-types?vertical=${encodeURIComponent(state.selectedVertical)}`);
+    const result = await api(`/component-types?vertical=${encodeURIComponent(state.selectedVertical)}`);
     state.components = result.items || [];
   } catch {
     state.components = [];
   }
+}
+
+async function refreshApplications() {
+  if (!state.selectedSkuId) {
+    state.applications = [];
+    renderPieceConfiguration();
+    return;
+  }
+  try {
+    const result = await api(`/skus/${encodeURIComponent(state.selectedSkuId)}/applications`);
+    state.applications = result.items || [];
+  } catch (error) {
+    state.applications = [];
+    renderPieceConfiguration(error);
+    return;
+  }
   renderPieceConfiguration();
 }
 
-function selectedProduct() {
-  return state.products.find((item) => item.key === state.selectedProductKey) || null;
+function applicationFor(component) {
+  return state.applications.find((item) => item.component_type_id === component.id && item.status !== "archived") || null;
 }
 
-function productApplications() {
-  return state.applications.filter((item) => item.productKey === state.selectedProductKey && item.vertical === state.selectedVertical && item.status !== "archived");
-}
-
-function applicationFor(componentCode) {
-  return productApplications().find((item) => item.componentCode === componentCode);
+function evidenceReference(application) {
+  return application?.evidence?.find((item) => item.scope?.reference)?.scope?.reference || "";
 }
 
 function applicationAlerts(application, component) {
   const alerts = [];
   if (!application && component.required) alerts.push("Componente obrigatório sem material");
-  if (application && !application.articleId) alerts.push("Artigo comercial não selecionado");
-  if (application && !application.batchReference) alerts.push("Lote não informado");
-  if (application && !application.evidenceReference) alerts.push("Evidência não vinculada");
+  if (application && !application.batch_reference) alerts.push("Lote não informado");
+  if (application && !application.evidence_count) alerts.push("Evidência não vinculada");
+  if (application && Number(application.composition_total_pct) < 99.5) alerts.push(`Composição incompleta: ${Number(application.composition_total_pct).toLocaleString("pt-BR")}%`);
   if (application?.confidence === "conflicting") alerts.push("Informação conflitante");
   return alerts;
 }
 
 function configurationCompleteness() {
-  const required = state.components.filter((item) => item.required);
-  const configured = required.filter((item) => Boolean(applicationFor(item.code)));
-  return required.length ? Math.round((configured.length / required.length) * 100) : 0;
+  const requiredComponents = state.components.filter((item) => item.required);
+  if (!requiredComponents.length) return 0;
+  return Math.round(requiredComponents.filter((item) => applicationFor(item)).length / requiredComponents.length * 100);
 }
 
-function renderPieceConfiguration() {
+function renderPieceConfiguration(error = null) {
   const product = selectedProduct();
   const host = $("#pieceComponents");
   const summary = $("#pieceMaterialSummary");
   if (!host || !summary) return;
-  if (!product) {
+  if (error) {
     summary.innerHTML = "";
-    host.innerHTML = `<div class="materials-empty"><strong>Nenhuma peça disponível</strong><p>Cadastre uma peça no portfólio para configurar seus materiais.</p></div>`;
+    host.innerHTML = errorPanel("Não foi possível consultar as aplicações", error);
     return;
   }
-  const applications = productApplications();
-  const requiredMissing = state.components.filter((component) => component.required && !applicationFor(component.code)).length;
-  const evidenceMissing = applications.filter((item) => !item.evidenceReference).length;
+  if (!product) {
+    summary.innerHTML = "";
+    host.innerHTML = `<div class="materials-empty"><strong>Nenhum SKU persistente disponível</strong><p>O cadastro local do portfólio ainda não é um SKU do banco. Conecte a persistência de Product/SKU ou crie o SKU no Buyer Readiness antes de aplicar materiais.</p></div>`;
+    return;
+  }
+  const requiredMissing = state.components.filter((component) => component.required && !applicationFor(component)).length;
+  const evidenceMissing = state.applications.filter((item) => !item.evidence_count).length;
   summary.innerHTML = `
-    <div><span>Peça</span><strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.code)} · ${escapeHtml(verticalLabels[state.selectedVertical])}</small></div>
+    <div><span>SKU persistente</span><strong>${esc(product.name)}</strong><small>${esc(product.code)} · ${esc(verticalLabels[state.selectedVertical])}</small></div>
     <div><span>Completude obrigatória</span><strong>${configurationCompleteness()}%</strong><div class="bar"><i style="width:${configurationCompleteness()}%"></i></div></div>
     <div><span>Pendências</span><strong>${requiredMissing + evidenceMissing}</strong><small>${requiredMissing} componente(s) · ${evidenceMissing} evidência(s)</small></div>
   `;
   host.innerHTML = state.components.map((component) => {
-    const application = applicationFor(component.code);
+    const application = applicationFor(component);
     const alerts = applicationAlerts(application, component);
     return `
-      <article class="component-card ${application ? "configured" : ""}">
-        <div class="component-card-head"><div><span>${component.required ? "OBRIGATÓRIO" : "OPCIONAL"}</span><h4>${escapeHtml(component.name_pt)}</h4></div>${application ? `<span class="evidence-state ${escapeHtml(application.confidence)}">${escapeHtml(confidenceLabels[application.confidence] || application.confidence)}</span>` : ""}</div>
-        ${application ? `
-          <div class="component-material"><strong>${escapeHtml(application.articleName || application.materialName)}</strong><small>${escapeHtml(application.materialName)}${application.supplierName ? ` · ${escapeHtml(application.supplierName)}` : ""}</small><p>${escapeHtml(application.composition || "Composição não informada")}</p></div>
-          <div class="component-meta"><span>Lote: <b>${escapeHtml(application.batchReference || "pendente")}</b></span><span>Quantidade: <b>${escapeHtml(application.quantity || "—")} ${escapeHtml(application.quantityUnit || "")}</b></span><span>Evidência: <b>${escapeHtml(application.evidenceReference || "pendente")}</b></span></div>
-        ` : `<p class="component-empty">Nenhum material aplicado a este componente.</p>`}
-        ${alerts.length ? `<div class="component-alerts">${alerts.map((alert) => `<span>! ${escapeHtml(alert)}</span>`).join("")}</div>` : ""}
-        <div class="component-actions">${application ? `<button class="link edit-component-material" data-component="${escapeHtml(component.code)}">Editar</button><button class="link archive-component-material" data-component="${escapeHtml(component.code)}">Arquivar</button>` : `<button class="primary add-component-material" data-component="${escapeHtml(component.code)}">+ Adicionar material</button>`}</div>
+      <article class="component-card ${application ? "configured" : ""}" data-component-id="${esc(component.id)}">
+        <div class="component-card-head"><div><span>${component.required ? "OBRIGATÓRIO" : "OPCIONAL"}</span><h4>${esc(component.name_pt)}</h4></div>${application ? `<span class="evidence-state ${esc(application.confidence)}">${esc(confidenceLabels[application.confidence] || application.confidence)}</span>` : ""}</div>
+        ${application ? `<div class="component-material"><strong>${esc(application.commercial_name || application.commercial_code)}</strong><small>${esc(application.material_name_pt)} · ${esc(application.supplier_name)}</small><p>${esc(compositionText(application))}</p></div><div class="component-meta"><span>Lote: <b>${esc(application.batch_reference || "pendente")}</b></span><span>Quantidade: <b>${esc(application.quantity || "—")} ${esc(application.quantity_unit || "")}</b></span><span>Evidência: <b>${esc(evidenceReference(application) || "pendente")}</b></span></div>` : `<p class="component-empty">Nenhum artigo comercial aplicado.</p>`}
+        ${alerts.length ? `<div class="component-alerts">${alerts.map((alert) => `<span>! ${esc(alert)}</span>`).join("")}</div>` : ""}
+        <div class="component-actions">${application ? `<button class="link edit-component-material" data-component="${esc(component.id)}">Editar</button><button class="link archive-component-material" data-component="${esc(component.id)}">Arquivar</button>` : `<button class="primary add-component-material" data-component="${esc(component.id)}">+ Adicionar material</button>`}</div>
       </article>
     `;
   }).join("");
@@ -453,184 +499,230 @@ function renderPieceConfiguration() {
   renderMetrics();
 }
 
-function archiveApplication(componentCode) {
-  const application = applicationFor(componentCode);
+async function archiveApplication(componentId) {
+  const component = state.components.find((item) => item.id === componentId);
+  const application = component && applicationFor(component);
   if (!application) return;
-  application.status = "archived";
-  application.updatedAt = new Date().toISOString();
-  writeJson(STORAGE_KEY, state.applications);
-  renderPieceConfiguration();
-  renderApplicationsList();
-  toast("Aplicação arquivada; histórico preservado");
+  const card = $(`[data-component-id="${CSS.escape(componentId)}"]`);
+  card?.classList.add("component-saving");
+  try {
+    await api(`/skus/${encodeURIComponent(state.selectedSkuId)}/applications/${encodeURIComponent(application.id)}`, {
+      method: "DELETE",
+      body: { version: Number(application.version) },
+      headers: { "if-match": String(application.version) },
+    });
+    await Promise.all([refreshApplications(), refreshStatus()]);
+    toast("Aplicação arquivada; histórico preservado no PostgreSQL");
+  } catch (error) {
+    toast(error.message);
+    card?.classList.remove("component-saving");
+  }
 }
 
-async function openPicker(componentCode) {
+async function openPicker(componentId) {
   const product = selectedProduct();
-  if (!product) {
-    toast("Selecione uma peça antes de aplicar o material");
-    return;
-  }
-  state.picker = { componentCode, materialId: null, articleId: null };
-  const component = state.components.find((item) => item.code === componentCode);
-  $("#pickerTitle").textContent = component ? component.name_pt : "Selecionar material";
+  const component = state.components.find((item) => item.id === componentId);
+  if (!product || !component) return;
+  state.picker = { componentId, materialId: null, articleId: null };
+  $("#pickerTitle").textContent = component.name_pt;
   $("#pickerContext").textContent = `${product.name} · ${product.code} · ${verticalLabels[state.selectedVertical]}`;
   $("#pickerSearch").value = "";
   $("#materialApplicationForm").classList.add("hidden");
   $("#pickerResults").classList.remove("hidden");
-  await renderPickerResults();
   $("#materialPickerDialog").showModal();
+  await renderPickerResults();
+  const existing = applicationFor(component);
+  if (existing) selectPickerArticle(existing.primary_material_id, existing.commercial_article_id);
 }
 
 async function renderPickerResults() {
   const host = $("#pickerResults");
-  host.innerHTML = `<div class="materials-loading">Buscando materiais compatíveis…</div>`;
+  host.innerHTML = `<div class="materials-loading">Buscando artigos comerciais…</div>`;
+  const query = $("#pickerSearch").value.trim();
   try {
-    const term = $("#pickerSearch")?.value.trim() || "";
     const [materialsPayload, articlesPayload] = await Promise.all([
-      fetchJson(`/catalog?${queryString({ query: term, vertical: state.selectedVertical, limit: 80 })}`),
-      fetchJson(`/commercial-articles?${queryString({ query: term, vertical: state.selectedVertical })}`),
+      api(`/catalog?${params({ query, vertical: state.selectedVertical, limit: 120 })}`),
+      api(`/commercial-articles?${params({ query, vertical: state.selectedVertical, status: "active", limit: 200 })}`),
     ]);
     const materials = materialsPayload.items || [];
     const articles = articlesPayload.items || [];
-    if (!materials.length) {
-      host.innerHTML = `<div class="materials-empty"><strong>Nenhum material compatível</strong><p>Tente outro termo.</p></div>`;
+    state.materials = materials;
+    state.articles = articles;
+    const byMaterial = new Map(materials.map((material) => [material.id, { material, articles: [] }]));
+    for (const article of articles) {
+      if (!byMaterial.has(article.primary_material_id)) {
+        byMaterial.set(article.primary_material_id, { material: { id: article.primary_material_id, canonical_name_pt: article.material_name_pt, family_name_pt: article.family_name_pt, verticals: article.verticals }, articles: [] });
+      }
+      byMaterial.get(article.primary_material_id).articles.push(article);
+    }
+    const groups = [...byMaterial.values()];
+    if (!groups.length) {
+      host.innerHTML = `<div class="materials-empty"><strong>Nenhum material encontrado</strong><p>Cadastre um artigo comercial ou altere a busca.</p><button class="primary" id="pickerNewArticle">+ Cadastrar artigo</button></div>`;
+      $("#pickerNewArticle")?.addEventListener("click", () => openArticleDialog());
       return;
     }
-    host.innerHTML = materials.map((material) => {
-      const materialArticles = articles.filter((article) => article.material_id === material.id);
-      return `
-        <article class="picker-material-card">
-          <div class="picker-material-head"><div><strong>${escapeHtml(material.canonical_name_pt)}</strong><small>${escapeHtml(material.family_name_pt)} · ${escapeHtml(material.structure)}</small></div><button type="button" class="link picker-select-generic" data-material-id="${escapeHtml(material.id)}">Aplicar sem artigo</button></div>
-          ${materialArticles.length ? `<div class="picker-article-list">${materialArticles.map((article) => `<button type="button" class="picker-article" data-material-id="${escapeHtml(material.id)}" data-article-id="${escapeHtml(article.id)}"><span><strong>${escapeHtml(article.commercial_name)}</strong><small>${escapeHtml(article.commercial_code)} · ${escapeHtml(article.supplier_name)}</small></span><span>${escapeHtml(compositionText(article))}</span><i>Selecionar →</i></button>`).join("")}</div>` : `<p class="picker-no-article">Sem artigo comercial cadastrado.</p>`}
-        </article>
-      `;
-    }).join("");
-    all(".picker-select-generic", host).forEach((button) => button.addEventListener("click", () => choosePickerSelection(button.dataset.materialId, null, materials, articles)));
-    all(".picker-article", host).forEach((button) => button.addEventListener("click", () => choosePickerSelection(button.dataset.materialId, button.dataset.articleId, materials, articles)));
+    host.innerHTML = groups.map(({ material, articles: materialArticles }) => `
+      <article class="picker-material">
+        <div class="picker-material-head"><div><strong>${esc(material.canonical_name_pt)}</strong><small>${esc(material.family_name_pt || "")}</small></div><div class="material-mini-badges">${materialBadges(material)}</div></div>
+        ${materialArticles.length ? `<div class="picker-article-list">${materialArticles.map((article) => `<button type="button" class="picker-article" data-material="${esc(material.id)}" data-article="${esc(article.id)}"><span><strong>${esc(article.commercial_name || article.commercial_code)}</strong><small>${esc(article.commercial_code)} · ${esc(article.supplier_name)}</small></span><span>${esc(compositionText(article))}</span><i>Selecionar →</i></button>`).join("")}</div>` : `<p class="picker-no-article">Sem artigo comercial ativo.<br><button class="link picker-create-article" data-material="${esc(material.id)}">Cadastrar artigo deste material</button></p>`}
+      </article>
+    `).join("");
+    all(".picker-article", host).forEach((button) => button.addEventListener("click", () => selectPickerArticle(button.dataset.material, button.dataset.article)));
+    all(".picker-create-article", host).forEach((button) => button.addEventListener("click", () => openArticleDialog(button.dataset.material)));
   } catch (error) {
-    host.innerHTML = `<div class="materials-empty"><strong>Falha na busca</strong><p>${escapeHtml(error.message)}</p></div>`;
+    host.innerHTML = errorPanel("Falha na busca de artigos", error);
   }
 }
 
-function choosePickerSelection(materialId, articleId, materials, articles) {
+function selectPickerArticle(materialId, articleId) {
+  const article = state.articles.find((item) => item.id === articleId);
+  const material = state.materials.find((item) => item.id === materialId) || {
+    id: article?.primary_material_id,
+    canonical_name_pt: article?.material_name_pt,
+    family_name_pt: article?.family_name_pt,
+    base_origin: article?.base_origin,
+    structure: article?.structure,
+    verticals: article?.verticals,
+  };
+  if (!article) return;
   state.picker.materialId = materialId;
   state.picker.articleId = articleId;
-  const material = materials.find((item) => item.id === materialId);
-  const article = articles.find((item) => item.id === articleId);
   $("#pickerResults").classList.add("hidden");
   const form = $("#materialApplicationForm");
   form.classList.remove("hidden");
   form.reset();
-  const existing = applicationFor(state.picker.componentCode);
+  const component = state.components.find((item) => item.id === state.picker.componentId);
+  const existing = component && applicationFor(component);
   if (existing) {
-    for (const [name, value] of Object.entries(existing)) {
-      const field = form.elements.namedItem(name);
-      if (field) field.value = value ?? "";
-    }
+    form.elements.batchReference.value = existing.batch_reference || "";
+    form.elements.quantity.value = existing.quantity || "";
+    form.elements.quantityUnit.value = existing.quantity_unit || "m";
+    form.elements.confidence.value = existing.confidence || "unknown";
+    form.elements.evidenceReference.value = evidenceReference(existing);
+    form.elements.notesPt.value = existing.notes_pt || "";
   }
-  $("#selectedMaterialSnapshot").innerHTML = `
-    <span>MATERIAL SELECIONADO</span>
-    <strong>${escapeHtml(article?.commercial_name || material?.canonical_name_pt || "Material")}</strong>
-    <small>${escapeHtml(article ? `${material?.canonical_name_pt} · ${article.supplier_name}` : `${material?.family_name_pt} · sem artigo comercial`)}</small>
-    <p>${escapeHtml(article ? compositionText(article) : material?.technical_name || "")}</p>
-    <div class="material-mini-badges">${materialBadges(material || {})}</div>
-  `;
-  form.dataset.materialSnapshot = JSON.stringify({ material, article });
+  $("#selectedMaterialSnapshot").innerHTML = `<span>ARTIGO SELECIONADO</span><strong>${esc(article.commercial_name || article.commercial_code)}</strong><small>${esc(material.canonical_name_pt)} · ${esc(article.supplier_name)}</small><p>${esc(compositionText(article))}</p><div class="material-mini-badges">${materialBadges(material)}</div>`;
 }
 
-function saveApplication(event) {
+async function saveApplication(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const component = state.components.find((item) => item.id === state.picker.componentId);
+  const existing = component && applicationFor(component);
+  if (!component || !state.picker.articleId || !state.selectedSkuId) return;
+  const data = Object.fromEntries(new FormData(form));
+  const body = {
+    componentTypeId: component.id,
+    commercialArticleId: state.picker.articleId,
+    batchReference: data.batchReference,
+    quantity: data.quantity || null,
+    quantityUnit: data.quantityUnit,
+    confidence: data.confidence,
+    evidenceReference: data.evidenceReference,
+    notesPt: data.notesPt,
+    status: "active",
+  };
+  const submit = form.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  submit.textContent = "Salvando…";
+  try {
+    if (existing) {
+      body.version = Number(existing.version);
+      await api(`/skus/${encodeURIComponent(state.selectedSkuId)}/applications/${encodeURIComponent(existing.id)}`, {
+        method: "PATCH",
+        body,
+        headers: { "if-match": String(existing.version) },
+      });
+    } else {
+      await api(`/skus/${encodeURIComponent(state.selectedSkuId)}/applications`, {
+        method: "POST",
+        body,
+        headers: { "idempotency-key": idempotencyKey() },
+      });
+    }
+    $("#materialPickerDialog").close();
+    await Promise.all([refreshApplications(), refreshStatus()]);
+    switchTab("applications");
+    toast("Aplicação salva na Materials API");
+  } catch (error) {
+    toast(error.code === "APPLICATION_VERSION_CONFLICT" ? "A aplicação mudou. Atualizando os dados…" : error.message);
+    if (error.code === "APPLICATION_VERSION_CONFLICT") await refreshApplications();
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Salvar na Materials API";
+  }
+}
+
+async function beginApplicationFromMaterial(materialId, articleId = null) {
+  switchTab("applications");
+  if (!state.products.length) {
+    toast("Nenhum SKU persistente disponível");
+    return;
+  }
+  await Promise.all([refreshComponents(), refreshApplications()]);
+  const component = state.components.find((item) => item.required && !applicationFor(item)) || state.components[0];
+  if (!component) return;
+  await openPicker(component.id);
+  if (articleId) selectPickerArticle(materialId, articleId);
+  else {
+    const article = state.articles.find((item) => item.primary_material_id === materialId);
+    if (article) selectPickerArticle(materialId, article.id);
+    else openArticleDialog(materialId);
+  }
+}
+
+async function loadArticleDialogData() {
+  const [supplierPayload, materialPayload] = await Promise.all([
+    api("/organizations"),
+    api("/catalog?limit=120"),
+  ]);
+  state.suppliers = supplierPayload.items || [];
+  const materials = materialPayload.items || [];
+  const form = $("#commercialArticleForm");
+  form.elements.supplierOrganizationId.innerHTML = `<option value="">Selecione</option>` + state.suppliers.map((item) => `<option value="${esc(item.id)}">${esc(item.name)}${item.type ? ` · ${esc(item.type)}` : ""}</option>`).join("");
+  form.elements.primaryMaterialId.innerHTML = `<option value="">Selecione</option>` + materials.map((item) => `<option value="${esc(item.id)}">${esc(item.canonical_name_pt)} · ${esc(item.family_name_pt)}</option>`).join("");
+  return materials;
+}
+
+async function openArticleDialog(materialId = null) {
+  state.articleDialogContext = { materialId, returnToPicker: $("#materialPickerDialog")?.open || false };
+  const form = $("#commercialArticleForm");
+  form.reset();
+  try {
+    await loadArticleDialogData();
+    if (materialId) form.elements.primaryMaterialId.value = materialId;
+    $("#commercialArticleDialog").showModal();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+async function saveCommercialArticle(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const data = Object.fromEntries(new FormData(form));
-  const snapshot = JSON.parse(form.dataset.materialSnapshot || "{}");
-  const product = selectedProduct();
-  const component = state.components.find((item) => item.code === state.picker.componentCode);
-  if (!product || !component || !snapshot.material) return;
-  const record = {
-    id: applicationFor(component.code)?.id || `application-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    productKey: product.key,
-    productName: product.name,
-    productCode: product.code,
-    vertical: state.selectedVertical,
-    componentCode: component.code,
-    componentName: component.name_pt,
-    materialId: snapshot.material.id,
-    materialName: snapshot.material.canonical_name_pt,
-    materialSnapshot: snapshot.material,
-    articleId: snapshot.article?.id || null,
-    articleName: snapshot.article?.commercial_name || null,
-    articleCode: snapshot.article?.commercial_code || null,
-    supplierName: snapshot.article?.supplier_name || null,
-    composition: snapshot.article ? compositionText(snapshot.article) : null,
-    articleSnapshot: snapshot.article || null,
-    batchReference: data.batchReference?.trim() || "",
-    quantity: data.quantity || "",
-    quantityUnit: data.quantityUnit || "",
-    confidence: data.confidence || "unknown",
-    evidenceReference: data.evidenceReference?.trim() || "",
-    notes: data.notes?.trim() || "",
-    status: "active",
-    updatedAt: new Date().toISOString(),
-  };
-  const index = state.applications.findIndex((item) => item.id === record.id);
-  if (index >= 0) state.applications[index] = record;
-  else state.applications.push(record);
-  writeJson(STORAGE_KEY, state.applications);
-  $("#materialPickerDialog").close();
-  switchTab("applications");
-  renderPieceConfiguration();
-  renderApplicationsList();
-  toast("Material aplicado à peça com snapshot preservado");
-}
-
-function renderApplicationsList() {
-  if (state.tab !== "applications") return;
-  renderPieceConfiguration();
-}
-
-function renderMetrics() {
-  const host = $("#materialsMetrics");
-  if (!host) return;
-  const activeApplications = state.applications.filter((item) => item.status !== "archived");
-  const documented = activeApplications.filter((item) => ["documented", "laboratory_tested", "reviewed", "validated"].includes(item.confidence)).length;
-  host.innerHTML = [
-    ["Materiais canônicos", state.status?.canonical_materials ?? state.materials.length],
-    ["Artigos comerciais", state.status?.commercial_articles ?? state.articles.length],
-    ["Aplicações ativas", activeApplications.length],
-    ["Aplicações documentadas", documented],
-  ].map(([label, value]) => `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("");
-}
-
-function renderCurrentTab() {
-  if (state.tab === "catalog") refreshCatalog();
-  if (state.tab === "articles") refreshArticles();
-  if (state.tab === "applications") refreshComponents();
-  renderMetrics();
-}
-
-function beginApplicationFromMaterial(materialId, articleId = null) {
-  switchTab("applications");
-  if (!state.products.length) {
-    toast("Cadastre uma peça antes de aplicar materiais");
-    return;
-  }
-  const firstComponent = state.components.find((item) => item.required) || state.components[0];
-  if (!firstComponent) {
-    refreshComponents().then(() => {
-      const component = state.components.find((item) => item.required) || state.components[0];
-      if (component) openPicker(component.code).then(() => preselectPicker(materialId, articleId));
+  const submit = form.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  submit.textContent = "Cadastrando…";
+  try {
+    const article = await api("/commercial-articles", {
+      method: "POST",
+      headers: { "idempotency-key": idempotencyKey() },
+      body: data,
     });
-    return;
+    $("#commercialArticleDialog").close();
+    await Promise.all([refreshArticles(), refreshStatus()]);
+    toast("Artigo comercial persistido");
+    if (state.articleDialogContext?.returnToPicker) {
+      await renderPickerResults();
+      selectPickerArticle(article.primary_material_id, article.id);
+    }
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Cadastrar artigo";
   }
-  openPicker(firstComponent.code).then(() => preselectPicker(materialId, articleId));
-}
-
-async function preselectPicker(materialId, articleId) {
-  const materialsPayload = await fetchJson(`/catalog?${queryString({ vertical: state.selectedVertical, limit: 120 })}`);
-  const articlesPayload = await fetchJson(`/commercial-articles?${queryString({ vertical: state.selectedVertical })}`);
-  const material = (materialsPayload.items || []).find((item) => item.id === materialId);
-  const article = (articlesPayload.items || []).find((item) => item.id === articleId);
-  if (material) choosePickerSelection(materialId, article?.id || null, materialsPayload.items || [], articlesPayload.items || []);
 }
 
 function enhanceProductRows() {
@@ -638,8 +730,7 @@ function enhanceProductRows() {
   if (!table) return;
   all(".product-line", table).forEach((row) => {
     if ($(".configure-piece-materials", row)) return;
-    const codeText = $("small", row)?.textContent || "";
-    const code = codeText.split("·")[0].trim();
+    const code = ($("small", row)?.textContent || "").split("·")[0].trim();
     const name = $("strong", row)?.textContent?.trim() || code;
     const actions = $(".row-actions", row) || row.lastElementChild;
     if (!actions) return;
@@ -650,44 +741,76 @@ function enhanceProductRows() {
     button.addEventListener("click", async () => {
       await refreshProducts();
       const match = state.products.find((item) => item.code === code || item.name === name);
-      if (match) state.selectedProductKey = match.key;
+      if (!match) {
+        toast("Esta peça ainda é local; persista o SKU antes de aplicar materiais");
+        showMaterials();
+        switchTab("applications");
+        return;
+      }
+      state.selectedSkuId = match.id;
+      state.selectedVertical = match.vertical;
       renderProductOptions();
       showMaterials();
       switchTab("applications");
-      await refreshComponents();
+      await Promise.all([refreshComponents(), refreshApplications()]);
     });
     actions.prepend(button);
   });
 }
 
+function errorPanel(title, error) {
+  return `<div class="materials-empty"><strong>${esc(title)}</strong><p>${esc(error.message || error)}</p>${error.code ? `<small>Código: ${esc(error.code)}</small>` : ""}</div>`;
+}
+
+async function refreshStatus() {
+  try {
+    state.status = await api("/status");
+  } catch (error) {
+    state.status = { available: false, runtime_ready: false, reason: error.message };
+  }
+  renderStatus();
+  renderMetrics();
+}
+
+async function renderCurrentTab() {
+  if (state.tab === "catalog") await refreshCatalog();
+  if (state.tab === "articles") await refreshArticles();
+  if (state.tab === "applications") {
+    await refreshProducts();
+    await refreshComponents();
+    await refreshApplications();
+  }
+  renderMetrics();
+}
+
 function bindEvents() {
   all("[data-materials-tab]").forEach((button) => button.addEventListener("click", () => switchTab(button.dataset.materialsTab)));
   $("#openPieceMaterials").addEventListener("click", () => switchTab("applications"));
+  $("#newCommercialArticle").addEventListener("click", () => openArticleDialog());
   $("#materialsProductSelect").addEventListener("change", async (event) => {
-    state.selectedProductKey = event.target.value;
+    state.selectedSkuId = event.target.value || null;
+    state.selectedVertical = selectedProduct()?.vertical || state.selectedVertical;
     renderProductOptions();
-    await refreshComponents();
+    await Promise.all([refreshComponents(), refreshApplications()]);
   });
   $("#materialsProductVertical").addEventListener("change", async (event) => {
     state.selectedVertical = event.target.value;
-    state.productVerticals[state.selectedProductKey] = state.selectedVertical;
-    writeJson(PRODUCT_VERTICAL_KEY, state.productVerticals);
-    await refreshComponents();
+    await Promise.all([refreshComponents(), refreshApplications()]);
   });
 
   let searchTimer;
-  const scheduleRefresh = () => {
+  const schedule = () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
       if (state.tab === "catalog") refreshCatalog();
       if (state.tab === "articles") refreshArticles();
     }, 300);
   };
-  $("#materialsSearch").addEventListener("input", scheduleRefresh);
-  all("#materialsVertical, #materialsFamily, #materialsOrigin, #materialsStructure, #materialsCertification, #materialsEvidence").forEach((field) => field.addEventListener("change", scheduleRefresh));
+  $("#materialsSearch").addEventListener("input", schedule);
+  all("#materialsVertical, #materialsFamily, #materialsOrigin, #materialsStructure, #materialsEvidence").forEach((field) => field.addEventListener("change", schedule));
   $("#clearMaterialsFilters").addEventListener("click", () => {
     $("#materialsSearch").value = "";
-    all("#materialsVertical, #materialsFamily, #materialsOrigin, #materialsStructure, #materialsCertification, #materialsEvidence").forEach((field) => { field.value = ""; });
+    all("#materialsVertical, #materialsFamily, #materialsOrigin, #materialsStructure, #materialsEvidence").forEach((field) => { field.value = ""; });
     renderCurrentTab();
   });
 
@@ -701,32 +824,30 @@ function bindEvents() {
     $("#materialApplicationForm").classList.add("hidden");
     $("#pickerResults").classList.remove("hidden");
   });
+  $("#commercialArticleForm").addEventListener("submit", saveCommercialArticle);
   $("[data-close-material-dialog]").addEventListener("click", () => $("#materialDetailDialog").close());
   $("[data-close-picker]").addEventListener("click", () => $("#materialPickerDialog").close());
+  all("[data-close-article-dialog]").forEach((button) => button.addEventListener("click", () => $("#commercialArticleDialog").close()));
 }
 
 async function init() {
   installNavigation();
   installView();
   bindEvents();
+  await refreshStatus();
   try {
-    [state.status, state.filters] = await Promise.all([fetchJson("/status"), fetchJson("/filters")]);
-    $("#materialsModeBadge").textContent = `Catálogo piloto v${state.status.version} · ${state.status.canonical_materials} materiais`;
+    state.filters = await api("/filters");
     populateFilters();
   } catch (error) {
-    $("#materialsModeBadge").textContent = "Base indisponível";
-    $("#materialsModeBadge").classList.add("error");
-    console.error("Materials Knowledge Base", error);
+    $("#materialsCapabilityNote").textContent = error.message;
   }
   await refreshProducts();
   await refreshComponents();
-  await refreshCatalog();
-  await refreshArticles();
+  await Promise.allSettled([refreshCatalog(), refreshArticles(), refreshApplications()]);
   renderMetrics();
   enhanceProductRows();
-  const observer = new MutationObserver(enhanceProductRows);
-  const productTable = $("#productTable");
-  if (productTable) observer.observe(productTable, { childList: true, subtree: true });
+  const table = $("#productTable");
+  if (table) new MutationObserver(enhanceProductRows).observe(table, { childList: true, subtree: true });
 }
 
 init();

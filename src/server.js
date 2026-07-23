@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceStore } from "./store.js";
-import { handleMaterialsPilotApi } from "./materials-pilot.js";
+import { createMaterialsApi } from "./materials-api.js";
 import { PI5MLOpsStore } from "./pi5-mlops.js";
 import { createUsageRepository } from "./usage-telemetry.js";
 import { CollaborationStore, IAMError, iamPhase0Enabled } from "./iam-collaboration.js";
@@ -14,6 +14,7 @@ const root = fileURLToPath(new URL("../public/", import.meta.url));
 const store = new EvidenceStore();
 const pi5MLOps = new PI5MLOpsStore();
 const usageRepository = createUsageRepository();
+const materialsApi = createMaterialsApi();
 const collaboration = new CollaborationStore();
 const iamEnabled = iamPhase0Enabled();
 const tenant = store.createTenant({ name: "PHYLLOS Demo", slug: "phyllos-demo" });
@@ -67,7 +68,7 @@ function snapshot() {
 }
 
 async function api(req, res, url) {
-  if (await handleMaterialsPilotApi({ req, res, url, json })) return;
+  if (await materialsApi.handle({ req, res, url, json })) return;
   if (req.method === "GET" && url.pathname === "/api/v1/iam/status") {
     return json(res, 200, { enabled: iamEnabled, phase: "phase-0", persistence: "process-local", production_ready: false });
   }
@@ -185,10 +186,10 @@ function enhanceIndexHtml(html) {
   }
 
   if (!next.includes("materials-knowledge.css")) {
-    next = next.replace("</head>", '  <link rel="stylesheet" href="/materials-knowledge.css?v=20260723-materials-1">\n</head>');
+    next = next.replace("</head>", '  <link rel="stylesheet" href="/materials-knowledge.css?v=20260723-materials-api-1">\n</head>');
   }
   if (!next.includes("materials-knowledge.js")) {
-    next = next.replace("</body>", '  <script type="module" src="/materials-knowledge.js?v=20260723-materials-1"></script>\n</body>');
+    next = next.replace("</body>", '  <script type="module" src="/materials-knowledge.js?v=20260723-materials-api-1"></script>\n</body>');
   }
 
   return next;
@@ -231,7 +232,7 @@ async function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
   console.log(`Encerrando PHYLLOS por ${signal}`);
-  try { await Promise.all([pi5MLOps.close(), usageRepository.close()]); }
+  try { await Promise.all([pi5MLOps.close(), usageRepository.close(), materialsApi.close()]); }
   finally { server.close(() => process.exit(0)); }
   setTimeout(() => process.exit(1), 10000).unref();
 }
