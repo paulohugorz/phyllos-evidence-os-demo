@@ -81,3 +81,68 @@ paths:
           schema: { type: string }
       responses:
         '200': { description: Revogado }
+
+  /api/v1/dpp/drafts:
+    post:
+      summary: Cria rascunho de DPP
+      responses:
+        '201': { description: Rascunho criado }
+  /api/v1/dpp/drafts/{id}:
+    get:
+      summary: Consulta rascunho
+      responses:
+        '200': { description: Rascunho }
+    patch:
+      summary: Atualiza seção do rascunho
+      responses:
+        '200': { description: Atualizado }
+  /api/v1/dpp/drafts/{id}/validate:
+    post:
+      summary: Executa validação e Evidence Gates
+      responses:
+        '200': { description: Resultado da validação }
+  /api/v1/dpp/drafts/{id}/preview:
+    get:
+      summary: Retorna prévia por perfil
+      responses:
+        '200': { description: Prévia }
+  /api/v1/dpp/drafts/{id}/review-link:
+    post:
+      summary: Gera link temporário de revisão
+      responses:
+        '201': { description: Link criado }
+  /api/v1/pi5/items/{itemId}:
+    get:
+      summary: Retorna PI5 por item
+      responses:
+        '200': { description: PI5 do item }
+  /api/v1/pi5/batches/{batchId}:
+    get:
+      summary: Retorna PI5 por lote
+      responses:
+        '200': { description: PI5 do lote }
+  /api/v1/pi5/batches/{batchId}/calculate:
+    post:
+      summary: Recalcula PI5 do lote
+      responses:
+        '200': { description: Cálculo concluído }
+  /api/v1/pi5/company:
+    get:
+      summary: Retorna PI5 empresarial realizado e projetado
+      responses:
+        '200': { description: PI5 empresarial }
+  /api/v1/pi5/company/recalculate:
+    post:
+      summary: Recalcula agregados empresariais
+      responses:
+        '202': { description: Recálculo iniciado }
+  /api/v1/pi5/company/history:
+    get:
+      summary: Retorna histórico de cálculos empresariais
+      responses:
+        '200': { description: Histórico }
+  /api/v1/pi5/company/itm-comparison:
+    get:
+      summary: Retorna comparação ITM-aligned
+      responses:
+        '200': { description: Comparação }

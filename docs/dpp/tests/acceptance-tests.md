@@ -51,3 +51,27 @@
 - estado não depende apenas de cor;
 - cada métrica mostra provenance;
 - gráficos possuem alternativa textual.
+
+
+## Criação e prévia
+- usuário cria DPP completo sem código;
+- autosave preserva alterações;
+- prévia pública corresponde aos campos públicos configurados;
+- link de revisão expira e pode ser revogado;
+- rascunho não aparece em busca pública;
+- publicação bloqueada por gates críticos.
+
+## PI5 incremental
+- conclusão de lote dispara recálculo;
+- resultado realizado não incorpora lote em produção;
+- resultado projetado incorpora planejamento;
+- alteração retroativa cria nova CalculationVersion;
+- contribuição do lote é reproduzível;
+- DPP publicado mantém snapshot anterior após recálculo empresarial.
+
+## ITM-aligned
+- frontend usa nomenclatura aprovada;
+- benchmark contém fonte, ano e versão;
+- dimensões incompatíveis não são comparadas;
+- componente operacional e corporativo são separados;
+- pesos alterados criam nova versão metodológica.

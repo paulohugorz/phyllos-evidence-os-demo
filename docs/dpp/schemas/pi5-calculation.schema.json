@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.phyllos.example/pi5/calculation-1.0.json",
+  "title": "PHYLLOS PI5 Calculation",
+  "type": "object",
+  "required": [
+    "id",
+    "level",
+    "resultType",
+    "methodologyVersion",
+    "calculatedAt",
+    "metrics"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "level": {
+      "enum": [
+        "item",
+        "batch",
+        "company"
+      ]
+    },
+    "entityId": {
+      "type": "string"
+    },
+    "resultType": {
+      "enum": [
+        "actual",
+        "forecast"
+      ]
+    },
+    "methodologyVersion": {
+      "type": "string"
+    },
+    "benchmarkVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "calculatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "itmAligned": {
+      "type": "object"
+    },
+    "inputSnapshotHash": {
+      "type": "string"
+    }
+  }
+}

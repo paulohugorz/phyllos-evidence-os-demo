@@ -139,3 +139,34 @@ Capacidade de replicar passaportes e metadados necessários para continuidade de
 
 ## RNF-010 — Integridade temporal
 Todos os tempos em UTC, sincronização confiável e carimbo de tempo para publicação.
+
+
+## RF-023 — Wizard de criação
+O frontend deve permitir criação completa do DPP por etapas, com autosave, validação, origem dos dados e retomada.
+
+## RF-024 — Pré-visualização
+O usuário deve consultar exatamente a representação pública antes da publicação, com banner de rascunho e modos de acesso.
+
+## RF-025 — Revisão privada
+O sistema deve gerar link temporário, não indexável e revogável para revisão antes da publicação.
+
+## RF-026 — PI5 por item e lote
+O sistema deve calcular impacto, cobertura, confiança e transparência por item/lote.
+
+## RF-027 — PI5 empresarial incremental
+O sistema deve atualizar o agregado empresarial com eventos de produção e preservar histórico de cálculo.
+
+## RF-028 — Realizado e projetado
+Resultados realizados e projetados devem ser calculados, armazenados e exibidos separadamente.
+
+## RF-029 — ITM-aligned
+O sistema deve comparar as dimensões compatíveis de transparência com benchmark ITM versionado, sem afirmar equivalência ao score oficial.
+
+## RF-030 — Snapshot de cálculo
+A publicação deve congelar o PI5, a metodologia, os fatores e o benchmark usados naquela versão.
+
+## RF-031 — Explicabilidade
+Toda métrica derivada deve expor fórmula, entradas, versão e provenance ao usuário autorizado.
+
+## RF-032 — Contribuição de lote
+O frontend deve mostrar como cada lote alterou os indicadores empresariais.

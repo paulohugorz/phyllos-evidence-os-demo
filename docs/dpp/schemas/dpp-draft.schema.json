@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.phyllos.example/dpp/draft-1.0.json",
+  "title": "PHYLLOS DPP Draft",
+  "type": "object",
+  "required": [
+    "id",
+    "status",
+    "scope",
+    "sections"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "incomplete",
+        "evidence_pending",
+        "review_pending",
+        "correction_required",
+        "ready_to_publish",
+        "publishing",
+        "published",
+        "publication_failed"
+      ]
+    },
+    "scope": {
+      "enum": [
+        "model",
+        "batch",
+        "item"
+      ]
+    },
+    "productId": {
+      "type": "string"
+    },
+    "batchId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "itemId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sections": {
+      "type": "object"
+    },
+    "readiness": {
+      "type": "object"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
