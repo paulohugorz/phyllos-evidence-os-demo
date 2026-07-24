@@ -9,6 +9,7 @@ import { createMaterialsApi } from "./materials-api.js";
 import { PI5MLOpsStore } from "./pi5-mlops.js";
 import { createUsageRepository } from "./usage-telemetry.js";
 import { CollaborationStore, IAMError, iamPhase0Enabled } from "./iam-collaboration.js";
+import { createDppPi5Api } from "./dpp-pi5-api.js";
 
 const root = fileURLToPath(new URL("../public/", import.meta.url));
 const store = new EvidenceStore();
@@ -16,6 +17,7 @@ const pi5MLOps = new PI5MLOpsStore();
 const usageRepository = createUsageRepository();
 const materialsApi = createMaterialsApi();
 const collaboration = new CollaborationStore();
+const dppPi5Api = createDppPi5Api();
 const iamEnabled = iamPhase0Enabled();
 const tenant = store.createTenant({ name: "PHYLLOS Demo", slug: "phyllos-demo" });
 const ctx = { tenantId: tenant.id, userId: "demo-analyst", role: "client_admin" };
@@ -68,6 +70,7 @@ function snapshot() {
 }
 
 async function api(req, res, url) {
+  if (await dppPi5Api.handle({ req, res, url, json, body })) return;
   if (await materialsApi.handle({ req, res, url, json })) return;
   if (req.method === "GET" && url.pathname === "/api/v1/iam/status") {
     return json(res, 200, { enabled: iamEnabled, phase: "phase-0", persistence: "process-local", production_ready: false });
@@ -140,9 +143,12 @@ const iamAssetsVersion = "20260722-iam-1";
 const moduleArchitectureAssetsVersion = "20260724-six-modules-1";
 
 const pi5V2AssetsVersion = "20260724-pi5-v2-itm-1";
+const dppAssetsVersion = "20260724-dpp-pi5-mvp-1";
 
 function enhanceIndexHtml(html) {
   let next = html;
+  if (!next.includes("dpp-console.css")) next = next.replace("</head>", `  <link rel="stylesheet" href="/dpp-console.css?v=${dppAssetsVersion}">\n</head>`);
+  if (!next.includes("dpp-console.js")) next = next.replace("</body>", `  <script type="module" src="/dpp-console.js?v=${dppAssetsVersion}"></script>\n</body>`);
   if (!next.includes("pi5-v2-itm.css")) {
     next = next.replace("</head>", `  <link rel="stylesheet" href="/pi5-v2-itm.css?v=${pi5V2AssetsVersion}">
 </head>`);
