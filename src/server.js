@@ -110,6 +110,9 @@ async function api(req, res, url) {
     const dossier = store.freezeDossier(ctx, { name: "Dossiê do piloto", productIds: products.map((x) => x.id) });
     return json(res, 201, { id: dossier.id, sha256: dossier.sha256, frozenAt: dossier.frozenAt, productCount: products.length, limitation: dossier.snapshot.limitations });
   }
+  if (req.method === "GET" && url.pathname === "/api/v1/pi5/dashboard") {
+    return json(res, 200, { version: "2.0-mvp", benchmark: { label: "ITM Brasil 2025", overall: 24, dimensions: { traceability: 30, ghg: 40, decarbonization: 16, renewable: 33, justTransition: 9 } }, warning: "Transparency does not equal environmental performance or certification" });
+  }
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/health") return json(res, 200, await pi5MLOps.health());
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/model") return json(res, 200, await pi5MLOps.currentModel());
   if (req.method === "GET" && url.pathname === "/api/v1/pi5/summary") return json(res, 200, await pi5MLOps.summary());
@@ -136,8 +139,14 @@ const iamAssetsVersion = "20260722-iam-1";
 
 const moduleArchitectureAssetsVersion = "20260724-six-modules-1";
 
+const pi5V2AssetsVersion = "20260724-pi5-v2-itm-1";
+
 function enhanceIndexHtml(html) {
   let next = html;
+  if (!next.includes("pi5-v2-itm.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/pi5-v2-itm.css?v=${pi5V2AssetsVersion}">
+</head>`);
+  }
   if (!next.includes("module-architecture.css")) {
     next = next.replace("</head>", `  <link rel="stylesheet" href="/module-architecture.css?v=${moduleArchitectureAssetsVersion}">
 </head>`);
@@ -200,6 +209,11 @@ function enhanceIndexHtml(html) {
 
   if (!next.includes("module-architecture.js")) {
     next = next.replace("</body>", `  <script type="module" src="/module-architecture.js?v=${moduleArchitectureAssetsVersion}"></script>
+</body>`);
+  }
+
+  if (!next.includes("pi5-v2-itm.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/pi5-v2-itm.js?v=${pi5V2AssetsVersion}"></script>
 </body>`);
   }
 
