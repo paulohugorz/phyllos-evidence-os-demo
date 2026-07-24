@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.phyllos.example/dpp/manifest-1.0.json",
+  "title": "PHYLLOS DPP Manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "passportId",
+    "identification",
+    "product",
+    "publication",
+    "proof"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "phyllos-dpp-1.0"
+    },
+    "passportId": {
+      "type": "string",
+      "minLength": 16
+    },
+    "identification": {
+      "type": "object",
+      "required": [
+        "level",
+        "canonicalUri"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "model",
+            "batch",
+            "item"
+          ]
+        },
+        "canonicalUri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "gtin": {
+          "type": "string"
+        },
+        "batchNumber": {
+          "type": "string"
+        },
+        "serialNumber": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "product": {
+      "type": "object"
+    },
+    "economicOperator": {
+      "type": "object"
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "supplyChain": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "production": {
+      "type": "object"
+    },
+    "environmentalPerformance": {
+      "type": "object"
+    },
+    "transparency": {
+      "type": "object"
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "care": {
+      "type": "object"
+    },
+    "circularity": {
+      "type": "object"
+    },
+    "evidenceSummary": {
+      "type": "object"
+    },
+    "publication": {
+      "type": "object",
+      "required": [
+        "version",
+        "issuedAt",
+        "status"
+      ],
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "published",
+            "superseded",
+            "suspended",
+            "revoked"
+          ]
+        },
+        "previousVersionHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "contentHash",
+        "signature",
+        "verificationMethod"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string"
+        },
+        "contentHash": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "verificationMethod": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

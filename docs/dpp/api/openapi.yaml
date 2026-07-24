@@ -1,0 +1,83 @@
+openapi: 3.1.0
+info:
+  title: PHYLLOS DPP Public API
+  version: 1.0.0
+paths:
+  /api/v1/dpp/{identifier}:
+    get:
+      summary: Retorna o passaporte público vigente
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Passaporte encontrado }
+        '404': { description: Identificador não encontrado }
+  /api/v1/dpp/{identifier}/history:
+    get:
+      summary: Retorna histórico público de versões
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Histórico }
+  /api/v1/dpp/{identifier}/verify:
+    get:
+      summary: Verifica assinatura, versão e estado
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Resultado da verificação }
+  /api/v1/dpp/{identifier}/manifest:
+    get:
+      summary: Retorna manifesto estruturado
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Manifesto JSON ou JSON-LD }
+  /api/v1/resolver/{identifier}:
+    get:
+      summary: Resolve identificador para recursos disponíveis
+      parameters:
+        - in: path
+          name: identifier
+          required: true
+          schema: { type: string }
+      responses:
+        '302': { description: Redirecionamento para recurso padrão }
+        '200': { description: Lista de links por tipo }
+  /api/v1/internal/dpp:
+    post:
+      summary: Cria rascunho de passaporte
+      responses:
+        '201': { description: Criado }
+  /api/v1/internal/dpp/{id}/publish:
+    post:
+      summary: Executa gates, congela, assina e publica nova versão
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Versão publicada }
+        '409': { description: Evidence Gates bloqueados }
+  /api/v1/internal/dpp/{id}/revoke:
+    post:
+      summary: Revoga o passaporte ou versão
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Revogado }
