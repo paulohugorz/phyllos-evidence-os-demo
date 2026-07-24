@@ -134,8 +134,14 @@ const onboardingAssetsVersion = "20260718-onboarding-1";
 const usageAssetsVersion = "20260721-usage-1";
 const iamAssetsVersion = "20260722-iam-1";
 
+const moduleArchitectureAssetsVersion = "20260724-six-modules-1";
+
 function enhanceIndexHtml(html) {
   let next = html;
+  if (!next.includes("module-architecture.css")) {
+    next = next.replace("</head>", `  <link rel="stylesheet" href="/module-architecture.css?v=${moduleArchitectureAssetsVersion}">
+</head>`);
+  }
   if (!next.includes("production-cards.css")) {
     next = next.replace("</head>", `  <link rel="stylesheet" href="/production-cards.css?v=${productionAssetsVersion}">
 </head>`);
@@ -190,6 +196,11 @@ function enhanceIndexHtml(html) {
   }
   if (!next.includes("materials-knowledge.js")) {
     next = next.replace("</body>", '  <script type="module" src="/materials-knowledge.js?v=20260723-materials-api-1"></script>\n</body>');
+  }
+
+  if (!next.includes("module-architecture.js")) {
+    next = next.replace("</body>", `  <script type="module" src="/module-architecture.js?v=${moduleArchitectureAssetsVersion}"></script>
+</body>`);
   }
 
   return next;
