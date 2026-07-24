@@ -143,10 +143,13 @@ const iamAssetsVersion = "20260722-iam-1";
 const moduleArchitectureAssetsVersion = "20260724-six-modules-1";
 
 const pi5V2AssetsVersion = "20260724-pi5-v2-itm-1";
+const platformFlowAssetsVersion = "20260724-platform-flow-v2";
 const dppAssetsVersion = "20260724-dpp-pi5-mvp-1";
 
 function enhanceIndexHtml(html) {
   let next = html;
+  if (!next.includes("platform-flow-fixes.css")) next = next.replace("</head>", `  <link rel="stylesheet" href="/platform-flow-fixes.css?v=${platformFlowAssetsVersion}">\n</head>`);
+  if (!next.includes("platform-flow-fixes.js")) next = next.replace("</body>", `  <script type="module" src="/platform-flow-fixes.js?v=${platformFlowAssetsVersion}"></script>\n</body>`);
   if (!next.includes("dpp-console.css")) next = next.replace("</head>", `  <link rel="stylesheet" href="/dpp-console.css?v=${dppAssetsVersion}">\n</head>`);
   if (!next.includes("dpp-console.js")) next = next.replace("</body>", `  <script type="module" src="/dpp-console.js?v=${dppAssetsVersion}"></script>\n</body>`);
   if (!next.includes("pi5-v2-itm.css")) {
